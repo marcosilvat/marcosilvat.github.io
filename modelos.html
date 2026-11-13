@@ -179,7 +179,7 @@
 
   <div class="container">
     <header class="intro">
-      <h1>Modelos de cobrança</h1>
+      <h1>Modelos de mensagem</h1>
       <p>Modelos prontos e como cada um aparece no WhatsApp do cliente. Copie o texto e cadastre a template, ou crie o seu modelo.</p>
     </header>
 
@@ -199,6 +199,8 @@
               <option value="negociacao">Negociação</option>
               <option value="pagamento">Pagamento</option>
               <option value="aviso">Avisos</option>
+              <option value="manutencao">Manutenção</option>
+              <option value="contrato">Contrato</option>
             </select>
           </div>
           <div class="field full">
@@ -240,6 +242,8 @@
         <button type="button" class="tab-btn" data-cat="negociacao">Negociação</button>
         <button type="button" class="tab-btn" data-cat="pagamento">Pagamento</button>
         <button type="button" class="tab-btn" data-cat="aviso">Avisos</button>
+        <button type="button" class="tab-btn" data-cat="manutencao">Manutenção</button>
+        <button type="button" class="tab-btn" data-cat="contrato">Contrato</button>
       </div>
       <input type="search" id="search" class="search-input" placeholder="Pesquisar modelo" aria-label="Pesquisar modelo">
     </div>
@@ -248,7 +252,7 @@
   </div>
 
   <script>
-    const GROUPS = { lembrete: "Lembrete", cobranca: "Cobrança", negociacao: "Negociação", pagamento: "Pagamento", aviso: "Avisos", meus: "Meus modelos" };
+    const GROUPS = { lembrete: "Lembrete", cobranca: "Cobrança", negociacao: "Negociação", pagamento: "Pagamento", aviso: "Avisos", manutencao: "Manutenção", contrato: "Contrato", meus: "Meus modelos" };
 
     const builtinModels = [
       {
@@ -531,7 +535,25 @@
         "cat": "aviso",
         "vars": "nome, e-mail",
         "text": "Olá, {{1}}! Sua fatura também foi enviada para o e-mail {{2}}.\n\nSe não encontrar, confira a caixa de spam."
-      }
+      },
+      {"title": "Manutenção programada", "cat": "manutencao", "vars": "nome, data, horário de início, horário de término", "text": "Olá, {{1}}. Faremos uma manutenção programada na rede no dia {{2}}, das {{3}} às {{4}}.\n\nNesse período, sua conexão pode ficar instável ou indisponível."},
+      {"title": "Lembrete de manutenção amanhã", "cat": "manutencao", "vars": "nome, horário de início, horário de término", "text": "Oi, {{1}}. Lembrando que amanhã, das {{2}} às {{3}}, haverá manutenção na rede da sua região.\n\nPedimos desculpas pelo transtorno."},
+      {"title": "Manutenção emergencial", "cat": "manutencao", "vars": "nome, região", "text": "Olá, {{1}}. Identificamos uma falha na rede que atende {{2}} e nossa equipe técnica já está trabalhando no reparo.\n\nAvisaremos assim que o serviço for normalizado."},
+      {"title": "Previsão de normalização", "cat": "manutencao", "vars": "nome, previsão", "text": "Olá, {{1}}. Atualização sobre a manutenção: a previsão de normalização é {{2}}.\n\nObrigado pela paciência."},
+      {"title": "Manutenção concluída", "cat": "manutencao", "vars": "nome", "text": "Olá, {{1}}! A manutenção foi concluída e o serviço já está normalizado.\n\nSe a conexão não voltar, reinicie o roteador ou fale com a gente.", "button": "Falar com o suporte"},
+      {"title": "Visita técnica agendada", "cat": "manutencao", "vars": "nome, data, período", "text": "Olá, {{1}}! Sua visita técnica está agendada para {{2}}, no período da {{3}}.\n\nÉ necessário ter um responsável maior de 18 anos no local.", "button": "Reagendar visita"},
+      {"title": "Lembrete de visita técnica", "cat": "manutencao", "vars": "nome, período", "text": "Oi, {{1}}. Nosso técnico vai até você hoje, no período da {{2}}.\n\nSe precisar remarcar, responda esta mensagem.", "button": "Reagendar visita"},
+      {"title": "Técnico a caminho", "cat": "manutencao", "vars": "nome, nome do técnico", "text": "Olá, {{1}}! O técnico {{2}} está a caminho do seu endereço.\n\nPor favor, deixe o acesso ao equipamento liberado."},
+      {"title": "Atendimento técnico finalizado", "cat": "manutencao", "vars": "nome, número do protocolo", "text": "Olá, {{1}}. Seu atendimento técnico foi finalizado, protocolo {{2}}.\n\nConte para a gente como foi o atendimento.", "button": "Avaliar atendimento"},
+      {"title": "Contrato para assinatura", "cat": "contrato", "vars": "nome, plano", "text": "Olá, {{1}}! Seu contrato do plano {{2}} está pronto para assinatura.\n\nToque no botão abaixo para ler e assinar digitalmente.", "pdf": true, "button": "Assinar contrato"},
+      {"title": "Lembrete de assinatura pendente", "cat": "contrato", "vars": "nome, data limite", "text": "Oi, {{1}}. Seu contrato ainda está aguardando assinatura. O prazo vai até {{2}}.\n\nA instalação é agendada logo após a assinatura.", "button": "Assinar contrato"},
+      {"title": "Contrato assinado", "cat": "contrato", "vars": "nome, número do contrato", "text": "Olá, {{1}}! Recebemos seu contrato assinado, número {{2}}.\n\nA cópia segue em anexo para você guardar.", "pdf": true},
+      {"title": "Instalação agendada", "cat": "contrato", "vars": "nome, data, período", "text": "Olá, {{1}}! Sua instalação está agendada para {{2}}, no período da {{3}}.\n\nTenha um responsável maior de 18 anos no local.", "button": "Reagendar instalação"},
+      {"title": "Boas-vindas", "cat": "contrato", "vars": "nome, plano", "text": "Olá, {{1}}! Seja bem-vindo. Seu plano {{2}} já está ativo.\n\nSalve este número para receber faturas e avisos por aqui."},
+      {"title": "Aditivo de contrato", "cat": "contrato", "vars": "nome, alteração", "text": "Olá, {{1}}. Preparamos um aditivo ao seu contrato referente a {{2}}.\n\nToque no botão abaixo para revisar e assinar.", "pdf": true, "button": "Assinar aditivo"},
+      {"title": "Mudança de plano confirmada", "cat": "contrato", "vars": "nome, novo plano, data", "text": "Olá, {{1}}! Sua mudança para o plano {{2}} foi confirmada e vale a partir de {{3}}.\n\nO novo valor aparece na próxima fatura."},
+      {"title": "Renovação de contrato", "cat": "contrato", "vars": "nome, data de término", "text": "Olá, {{1}}. Seu contrato de fidelidade termina em {{2}}.\n\nFale com a gente para conhecer as condições de renovação.", "button": "Falar com atendente"},
+      {"title": "Cancelamento confirmado", "cat": "contrato", "vars": "nome, número do protocolo", "text": "Olá, {{1}}. Seu pedido de cancelamento foi registrado com o protocolo {{2}}.\n\nNossa equipe vai combinar a retirada dos equipamentos."}
     ];
 
     const STORAGE_KEY = "chatmix-modelos";
@@ -563,7 +585,7 @@
       const order = (m.ref || m.pdf || hasPay) ? `
         <div class="wa-order">
           ${m.ref ? `<div>Nº da cobrança: 68254</div>` : ""}
-          ${m.pdf ? `<div class="wa-doc"><span class="pdf">PDF</span><b>Fatura.pdf<small>Anexo</small></b><span class="dl">↓</span></div>` : ""}
+          ${m.pdf ? `<div class="wa-doc"><span class="pdf">PDF</span><b>${m.cat === "contrato" ? "Contrato.pdf" : "Fatura.pdf"}<small>Anexo</small></b><span class="dl">↓</span></div>` : ""}
           ${hasPay ? `<div class="wa-row wa-pay">Pagar com <span>${m.barcode ? `<i>${BAR_ICON}</i>` : ""}${m.pix ? `<i>${PIX_ICON}</i>` : ""}</span></div>
           <div class="wa-row">Total <span>R$ 129,90</span></div>` : ""}
         </div>` : "";
@@ -610,7 +632,7 @@
         (groups[g] = groups[g] || []).push(m);
       });
 
-      const order = ["meus", "lembrete", "cobranca", "negociacao", "pagamento", "aviso"].filter(g => groups[g]);
+      const order = ["meus", "lembrete", "cobranca", "negociacao", "pagamento", "aviso", "manutencao", "contrato"].filter(g => groups[g]);
       if (!order.length) { listEl.innerHTML = `<p class="empty">Nenhum modelo encontrado.</p>`; return; }
 
       listEl.innerHTML = order.map(g => `
