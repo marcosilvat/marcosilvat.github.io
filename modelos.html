@@ -116,19 +116,26 @@
     .wa-top { background: #1f6e5a; color: #fff; display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; font-weight: 700; font-size: 0.9rem; }
     .wa-top svg { width: 22px; height: 22px; flex-shrink: 0; }
     .wa-chat { background: #e6ddd4; padding: 0.75rem; }
-    .wa-bubble { background: #fff; border-radius: 0 10px 10px 10px; max-width: 92%; box-shadow: 0 1px 1px #0000001a; font-size: 0.86rem; line-height: 1.45; overflow: hidden; }
-    .wa-ref { font-size: 0.78rem; font-weight: 600; padding: 0.5rem 0.7rem; border-bottom: 1px dashed #c9c9c9; }
-    .wa-doc { display: flex; align-items: center; gap: 0.6rem; margin: 0.5rem 0.6rem 0; padding: 0.55rem 0.6rem; background: #f3f4f5; border-radius: 8px; font-size: 0.8rem; }
+    .wa-bubble { background: #fff; border-radius: 0 10px 10px 10px; max-width: 92%; box-shadow: 0 1px 1px #0000001a; font-size: 0.86rem; line-height: 1.45; overflow: hidden; padding: 0.4rem; }
+    .wa-order { background: #e9edf0; border-radius: 6px; padding: 0 0.6rem; font-size: 0.8rem; }
+    .wa-order > div { padding: 0.5rem 0; border-bottom: 1px dashed #b9c2c9; }
+    .wa-order > div:last-child { border-bottom: none; }
+    .wa-doc { display: flex; align-items: center; gap: 0.6rem; background: #f6f7f8; border-radius: 6px; padding: 0.55rem 0.6rem !important; margin: 0.5rem 0; border-bottom: none !important; }
     .wa-doc .pdf { background: #d93a2b; color: #fff; font-size: 0.6rem; font-weight: 800; border-radius: 3px; padding: 0.35rem 0.25rem; }
+    .wa-doc b { font-weight: 500; flex: 1; }
     .wa-doc small { display: block; color: #6b7a86; }
-    .wa-text { padding: 0.55rem 0.7rem; white-space: pre-wrap; word-break: break-word; }
-    .wa-text .v { color: #1f6e5a; font-weight: 700; }
-    .wa-pay { display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed #c9c9c9; padding: 0.45rem 0.7rem; font-size: 0.78rem; font-weight: 700; }
+    .wa-doc .dl { width: 20px; height: 20px; border: 2px solid #1f8a4c; border-radius: 50%; display: grid; place-items: center; color: #1f8a4c; font-size: 0.7rem; font-weight: 800; }
+    .wa-row { display: flex; align-items: center; justify-content: space-between; }
+    .wa-pay { font-weight: 700; }
     .wa-pay span { display: flex; gap: 0.35rem; }
-    .wa-pay i { display: grid; place-items: center; width: 26px; height: 22px; border: 1px solid #d5d9dd; border-radius: 5px; font-style: normal; }
+    .wa-pay i { display: grid; place-items: center; width: 26px; height: 22px; background: #fff; border: 1px solid #d5d9dd; border-radius: 5px; font-style: normal; }
     .wa-pay svg { width: 16px; height: 16px; }
-    .wa-time { text-align: right; font-size: 0.68rem; color: #8a969f; padding: 0 0.6rem 0.35rem; }
-    .wa-btn { background: #fff; border-radius: 10px; max-width: 92%; margin-top: 4px; text-align: center; font-size: 0.82rem; font-weight: 600; color: #1b7bd1; padding: 0.45rem; box-shadow: 0 1px 1px #0000001a; }
+    .wa-text { padding: 0.45rem 0.3rem 0.1rem; white-space: pre-wrap; word-break: break-word; font-style: italic; }
+    .wa-text .v { color: #1f6e5a; font-weight: 700; font-style: normal; }
+    .wa-time { text-align: right; font-size: 0.68rem; color: #8a969f; padding: 0 0.2rem; }
+    .wa-btn { background: #fff; border-radius: 6px; max-width: 92%; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 0.35rem; font-size: 0.82rem; font-weight: 600; color: #1f8a4c; padding: 0.45rem; box-shadow: 0 1px 1px #0000001a; }
+    .wa-btn.link { color: #1b7bd1; }
+    .wa-btn svg { width: 14px; height: 14px; }
 
     .legend { font-size: 0.78rem; color: var(--muted); }
     .legend code { color: var(--text); }
@@ -189,7 +196,9 @@
             <select id="m-cat">
               <option value="lembrete">Lembrete</option>
               <option value="cobranca">Cobrança</option>
+              <option value="negociacao">Negociação</option>
               <option value="pagamento">Pagamento</option>
+              <option value="aviso">Avisos</option>
             </select>
           </div>
           <div class="field full">
@@ -228,7 +237,9 @@
         <button type="button" class="tab-btn active" data-cat="all">Todos</button>
         <button type="button" class="tab-btn" data-cat="lembrete">Lembrete</button>
         <button type="button" class="tab-btn" data-cat="cobranca">Cobrança</button>
+        <button type="button" class="tab-btn" data-cat="negociacao">Negociação</button>
         <button type="button" class="tab-btn" data-cat="pagamento">Pagamento</button>
+        <button type="button" class="tab-btn" data-cat="aviso">Avisos</button>
       </div>
       <input type="search" id="search" class="search-input" placeholder="Pesquisar modelo" aria-label="Pesquisar modelo">
     </div>
@@ -237,33 +248,290 @@
   </div>
 
   <script>
-    const GROUPS = { lembrete: "Lembrete", cobranca: "Cobrança", pagamento: "Pagamento", meus: "Meus modelos" };
+    const GROUPS = { lembrete: "Lembrete", cobranca: "Cobrança", negociacao: "Negociação", pagamento: "Pagamento", aviso: "Avisos", meus: "Meus modelos" };
 
     const builtinModels = [
-      { title: "Fatura disponível", cat: "lembrete", ref: true, pdf: true, pix: true, barcode: true,
-        vars: "nome, valor, vencimento",
-        text: "Olá, {{1}}! Sua fatura no valor de {{2}} já está disponível, com vencimento em {{3}}.\n\nVocê pode pagar pelo Pix ou pelo boleto abaixo." },
-      { title: "Fatura vence amanhã", cat: "lembrete", ref: true, pix: true, barcode: true,
-        vars: "nome, valor, vencimento",
-        text: "Oi, {{1}}. Passando para lembrar que sua fatura de {{2}} vence amanhã, {{3}}.\n\nPague agora e evite juros e multa." },
-      { title: "Fatura vence hoje", cat: "lembrete", ref: true, pdf: true, pix: true,
-        vars: "nome, valor",
-        text: "Olá, {{1}}! Hoje é o último dia para pagar sua fatura de {{2}} sem acréscimos.\n\nCom o Pix, a baixa é na hora." },
-      { title: "Fatura em atraso", cat: "cobranca", ref: true, pdf: true, pix: true, barcode: true,
-        vars: "nome, valor, vencimento",
-        text: "Olá, {{1}}. Não identificamos o pagamento da sua fatura de {{2}}, vencida em {{3}}.\n\nSe já pagou, desconsidere esta mensagem." },
-      { title: "Aviso de suspensão", cat: "cobranca", ref: true, pix: true, barcode: true,
-        vars: "nome, valor, data da suspensão",
-        text: "{{1}}, sua fatura de {{2}} continua em aberto. Para evitar a suspensão do serviço em {{3}}, faça o pagamento pelo Pix ou boleto abaixo." },
-      { title: "Segunda via da fatura", cat: "cobranca", ref: true, pdf: true, barcode: true,
-        vars: "nome, vencimento",
-        text: "Olá, {{1}}! Aqui está a segunda via da sua fatura, com vencimento em {{2}}." },
-      { title: "Pagamento recebido", cat: "pagamento", button: "Ver recibo",
-        vars: "nome, valor, mês de referência",
-        text: "Olá, {{1}}! Recebemos o pagamento de {{2}} referente à fatura de {{3}}.\n\nObrigado por manter seus pagamentos em dia." },
-      { title: "Serviço liberado", cat: "pagamento",
-        vars: "nome",
-        text: "Oi, {{1}}! Seu pagamento foi confirmado e o serviço já está liberado.\n\nSe a conexão não voltar em alguns minutos, reinicie o roteador." }
+      {
+        "title": "Fatura disponível",
+        "cat": "lembrete",
+        "vars": "nome, valor, vencimento",
+        "text": "Olá, {{1}}! Sua fatura no valor de {{2}} já está disponível, com vencimento em {{3}}.\n\nVocê pode pagar pelo Pix ou pelo boleto abaixo.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura vence em 5 dias",
+        "cat": "lembrete",
+        "vars": "nome, valor, vencimento",
+        "text": "Olá, {{1}}! Sua fatura de {{2}} vence em {{3}}, daqui a 5 dias.\n\nSe preferir, já pode deixar o pagamento em dia agora.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura vence em 3 dias",
+        "cat": "lembrete",
+        "vars": "nome, valor, vencimento",
+        "text": "Oi, {{1}}. Faltam 3 dias para o vencimento da sua fatura de {{2}}, no dia {{3}}.\n\nOs dados para pagamento estão abaixo.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura vence amanhã",
+        "cat": "lembrete",
+        "vars": "nome, valor, vencimento",
+        "text": "Oi, {{1}}. Passando para lembrar que sua fatura de {{2}} vence amanhã, {{3}}.\n\nPague agora e evite juros e multa.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura vence hoje",
+        "cat": "lembrete",
+        "vars": "nome, valor",
+        "text": "Olá, {{1}}! Hoje é o último dia para pagar sua fatura de {{2}} sem acréscimos.\n\nCom o Pix, a baixa é na hora.",
+        "ref": true,
+        "pdf": true,
+        "pix": true
+      },
+      {
+        "title": "Fatura com desconto até o vencimento",
+        "cat": "lembrete",
+        "vars": "nome, valor com desconto, vencimento",
+        "text": "Olá, {{1}}! Pagando até o vencimento, sua fatura sai por {{2}}. A data limite é {{3}}.\n\nAproveite e pague pelo Pix ou boleto abaixo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Lembrete só com Pix",
+        "cat": "lembrete",
+        "vars": "nome, valor, vencimento",
+        "text": "Oi, {{1}}! Sua fatura de {{2}} vence em {{3}}.\n\nCopie a chave Pix abaixo e pague em poucos segundos.",
+        "ref": true,
+        "pix": true
+      },
+      {
+        "title": "Fatura do mês com PDF",
+        "cat": "lembrete",
+        "vars": "nome, mês de referência, valor",
+        "text": "Olá, {{1}}! Segue a fatura de {{2}} no valor de {{3}}.\n\nO PDF está anexo para você conferir os detalhes.",
+        "ref": true,
+        "pdf": true,
+        "barcode": true
+      },
+      {
+        "title": "Débito automático agendado",
+        "cat": "lembrete",
+        "vars": "nome, valor, data do débito",
+        "text": "Olá, {{1}}. O débito automático da sua fatura de {{2}} está agendado para {{3}}.\n\nMantenha saldo na conta para evitar a cobrança manual.",
+        "button": "Ver fatura"
+      },
+      {
+        "title": "Fatura vencida há 1 dia",
+        "cat": "cobranca",
+        "vars": "nome, valor, vencimento",
+        "text": "Olá, {{1}}. Sua fatura de {{2}} venceu ontem, {{3}}.\n\nAinda dá tempo de pagar pelo Pix ou boleto abaixo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura em atraso",
+        "cat": "cobranca",
+        "vars": "nome, valor, vencimento",
+        "text": "Olá, {{1}}. Não identificamos o pagamento da sua fatura de {{2}}, vencida em {{3}}.\n\nSe já pagou, desconsidere esta mensagem.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Fatura em atraso há 7 dias",
+        "cat": "cobranca",
+        "vars": "nome, valor, vencimento",
+        "text": "Oi, {{1}}. Sua fatura de {{2}}, vencida em {{3}}, segue em aberto há 7 dias.\n\nRegularize agora para manter seu serviço ativo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Faturas em aberto",
+        "cat": "cobranca",
+        "vars": "nome, quantidade, valor total",
+        "text": "Olá, {{1}}. Você tem {{2}} faturas em aberto, somando {{3}}.\n\nFale com a gente para regularizar ou pague pelos dados abaixo.",
+        "ref": true,
+        "pix": true,
+        "button": "Falar com atendente"
+      },
+      {
+        "title": "Aviso de suspensão",
+        "cat": "cobranca",
+        "vars": "nome, valor, data da suspensão",
+        "text": "Olá, {{1}}. Sua fatura de {{2}} continua em aberto.\n\nPara evitar a suspensão do serviço em {{3}}, faça o pagamento pelo Pix ou boleto abaixo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Último aviso antes da suspensão",
+        "cat": "cobranca",
+        "vars": "nome, valor, data da suspensão",
+        "text": "Olá, {{1}}. Este é o último aviso: a fatura de {{2}} precisa ser paga até {{3}} para evitar a suspensão.\n\nSe já pagou, desconsidere.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Serviço suspenso",
+        "cat": "cobranca",
+        "vars": "nome, valor",
+        "text": "Olá, {{1}}. Seu serviço foi suspenso por falta de pagamento da fatura de {{2}}.\n\nApós o pagamento, a liberação é automática.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Segunda via da fatura",
+        "cat": "cobranca",
+        "vars": "nome, vencimento",
+        "text": "Olá, {{1}}! Aqui está a segunda via da sua fatura, com vencimento em {{2}}.\n\nO PDF segue anexo.",
+        "ref": true,
+        "pdf": true,
+        "barcode": true,
+        "pix": true
+      },
+      {
+        "title": "Boleto atualizado com juros",
+        "cat": "cobranca",
+        "vars": "nome, valor atualizado, nova data",
+        "text": "Olá, {{1}}. Geramos o boleto atualizado da sua fatura: {{2}}, válido até {{3}}.\n\nUse os dados abaixo para pagar.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Proposta de acordo",
+        "cat": "negociacao",
+        "vars": "nome, valor em aberto, valor do acordo",
+        "text": "Olá, {{1}}. Temos uma proposta para regularizar seu débito de {{2}}: quitação por {{3}}.\n\nResponda esta mensagem para aceitar.",
+        "button": "Quero negociar"
+      },
+      {
+        "title": "Parcelamento disponível",
+        "cat": "negociacao",
+        "vars": "nome, valor em aberto, número de parcelas",
+        "text": "Olá, {{1}}. Seu débito de {{2}} pode ser parcelado em até {{3}} vezes.\n\nFale com a gente para escolher a melhor opção.",
+        "button": "Ver opções"
+      },
+      {
+        "title": "Acordo confirmado",
+        "cat": "negociacao",
+        "vars": "nome, número de parcelas, valor da parcela",
+        "text": "Olá, {{1}}! Seu acordo foi confirmado em {{2}} parcelas de {{3}}.\n\nA primeira parcela segue abaixo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Parcela do acordo",
+        "cat": "negociacao",
+        "vars": "nome, número da parcela, valor, vencimento",
+        "text": "Olá, {{1}}. A parcela {{2}} do seu acordo, no valor de {{3}}, vence em {{4}}.\n\nPague pelo Pix ou boleto abaixo.",
+        "pdf": true,
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Parcela do acordo em atraso",
+        "cat": "negociacao",
+        "vars": "nome, número da parcela, valor",
+        "text": "Olá, {{1}}. A parcela {{2}} do seu acordo, de {{3}}, está em atraso.\n\nPague hoje para manter o acordo ativo.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Pagamento recebido",
+        "cat": "pagamento",
+        "vars": "nome, valor, mês de referência",
+        "text": "Olá, {{1}}! Recebemos o pagamento de {{2}} referente à fatura de {{3}}.\n\nObrigado por manter seus pagamentos em dia.",
+        "button": "Ver recibo"
+      },
+      {
+        "title": "Pagamento via Pix confirmado",
+        "cat": "pagamento",
+        "vars": "nome, valor",
+        "text": "Olá, {{1}}! Seu Pix de {{2}} foi confirmado.\n\nA baixa da fatura já foi feita."
+      },
+      {
+        "title": "Serviço liberado",
+        "cat": "pagamento",
+        "vars": "nome",
+        "text": "Oi, {{1}}! Seu pagamento foi confirmado e o serviço já está liberado.\n\nSe a conexão não voltar em alguns minutos, reinicie o roteador."
+      },
+      {
+        "title": "Pagamento em compensação",
+        "cat": "pagamento",
+        "vars": "nome, valor",
+        "text": "Olá, {{1}}. Recebemos a informação do pagamento de {{2}}.\n\nO boleto pode levar até 3 dias úteis para compensar."
+      },
+      {
+        "title": "Recibo de pagamento",
+        "cat": "pagamento",
+        "vars": "nome, valor, data do pagamento",
+        "text": "Olá, {{1}}! Segue o recibo do pagamento de {{2}}, feito em {{3}}.\n\nGuarde para sua conferência.",
+        "ref": true,
+        "pdf": true
+      },
+      {
+        "title": "Pagamento em duplicidade",
+        "cat": "pagamento",
+        "vars": "nome, valor",
+        "text": "Olá, {{1}}. Identificamos um pagamento em duplicidade de {{2}}.\n\nO valor ficará como crédito na próxima fatura.",
+        "button": "Falar com atendente"
+      },
+      {
+        "title": "Liberação em confiança",
+        "cat": "aviso",
+        "vars": "nome, data limite",
+        "text": "Olá, {{1}}! Seu serviço foi liberado em confiança até {{2}}.\n\nFaça o pagamento até essa data para não haver nova suspensão.",
+        "ref": true,
+        "pix": true,
+        "barcode": true
+      },
+      {
+        "title": "Mudança na data de vencimento",
+        "cat": "aviso",
+        "vars": "nome, novo dia de vencimento",
+        "text": "Olá, {{1}}. A partir da próxima fatura, o vencimento passa a ser todo dia {{2}}.\n\nQualquer dúvida, é só responder."
+      },
+      {
+        "title": "Reajuste de valor",
+        "cat": "aviso",
+        "vars": "nome, valor atual, novo valor, data",
+        "text": "Olá, {{1}}. Informamos que seu plano de {{2}} passa a custar {{3}} a partir de {{4}}.\n\nEm caso de dúvidas, fale com a gente."
+      },
+      {
+        "title": "Atualize seus dados de cobrança",
+        "cat": "aviso",
+        "vars": "nome",
+        "text": "Olá, {{1}}. Precisamos confirmar seus dados para continuar enviando suas faturas.\n\nToque no botão abaixo para atualizar.",
+        "button": "Atualizar dados"
+      },
+      {
+        "title": "Fatura enviada por e-mail",
+        "cat": "aviso",
+        "vars": "nome, e-mail",
+        "text": "Olá, {{1}}! Sua fatura também foi enviada para o e-mail {{2}}.\n\nSe não encontrar, confira a caixa de spam."
+      }
     ];
 
     const STORAGE_KEY = "chatmix-modelos";
@@ -287,22 +555,30 @@
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); return true; } catch { return false; }
     }
 
+    const COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 3h11a2 2 0 0 1 2 2v11h-2V5H8Zm-3 4h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/></svg>';
+
     function preview(m) {
       const text = esc(m.text || "").replace(/\{\{\d+\}\}/g, v => `<span class="v">${v}</span>`);
-      const pay = (m.pix || m.barcode)
-        ? `<div class="wa-pay">Pagar com <span>${m.barcode ? `<i>${BAR_ICON}</i>` : ""}${m.pix ? `<i>${PIX_ICON}</i>` : ""}</span></div>` : "";
+      const hasPay = m.pix || m.barcode;
+      const order = (m.ref || m.pdf || hasPay) ? `
+        <div class="wa-order">
+          ${m.ref ? `<div>Nº da cobrança: 68254</div>` : ""}
+          ${m.pdf ? `<div class="wa-doc"><span class="pdf">PDF</span><b>Fatura.pdf<small>Anexo</small></b><span class="dl">↓</span></div>` : ""}
+          ${hasPay ? `<div class="wa-row wa-pay">Pagar com <span>${m.barcode ? `<i>${BAR_ICON}</i>` : ""}${m.pix ? `<i>${PIX_ICON}</i>` : ""}</span></div>
+          <div class="wa-row">Total <span>R$ 129,90</span></div>` : ""}
+        </div>` : "";
       return `
         <div class="wa">
           <div class="wa-top">${WA_ICON}<span>${esc(m.title || "Nome do modelo")}</span></div>
           <div class="wa-chat">
             <div class="wa-bubble">
-              ${m.ref ? `<div class="wa-ref">Nº da cobrança: 48219</div>` : ""}
-              ${m.pdf ? `<div class="wa-doc"><span class="pdf">PDF</span><div>Fatura.pdf<small>Documento anexo</small></div></div>` : ""}
+              ${order}
               <div class="wa-text">${text || "&nbsp;"}</div>
-              ${pay}
               <div class="wa-time">09:41</div>
             </div>
-            ${m.button ? `<div class="wa-btn">${esc(m.button)}</div>` : ""}
+            ${m.pix ? `<div class="wa-btn">${COPY_ICON} Copiar Chave Pix</div>` : ""}
+            ${m.barcode ? `<div class="wa-btn">${COPY_ICON} Copiar código de barras</div>` : ""}
+            ${m.button ? `<div class="wa-btn link">${esc(m.button)}</div>` : ""}
           </div>
         </div>`;
     }
@@ -334,7 +610,7 @@
         (groups[g] = groups[g] || []).push(m);
       });
 
-      const order = ["meus", "lembrete", "cobranca", "pagamento"].filter(g => groups[g]);
+      const order = ["meus", "lembrete", "cobranca", "negociacao", "pagamento", "aviso"].filter(g => groups[g]);
       if (!order.length) { listEl.innerHTML = `<p class="empty">Nenhum modelo encontrado.</p>`; return; }
 
       listEl.innerHTML = order.map(g => `
