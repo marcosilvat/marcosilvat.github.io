@@ -225,11 +225,15 @@
             <label for="m-button">Botão (opcional)</label>
             <input type="text" id="m-button" placeholder="ex.: Ver fatura">
           </div>
+          <div class="field">
+            <label for="m-key">Chave do time</label>
+            <input type="password" id="m-key" autocomplete="off" placeholder="Fica lembrada neste navegador">
+          </div>
           <div class="save-row">
-            <button type="button" class="btn" id="m-save">Salvar modelo</button>
+            <button type="button" class="btn" id="m-save">Salvar e publicar</button>
             <span class="feedback" id="m-feedback" aria-live="polite"></span>
           </div>
-          <p class="legend full" style="grid-column: 1 / -1">O modelo fica salvo primeiro só neste navegador, em “Meus modelos”. Para aparecer para todos, clique em <strong>Publicar no site</strong> no cartão dele: o GitHub abre com o modelo pronto, é só clicar em <strong>Commit changes</strong>. Em 1 ou 2 minutos ele aparece para o time. Precisa ter acesso de edição ao repositório.</p>
+          <p class="legend full" style="grid-column: 1 / -1">Ao salvar, o modelo vai direto para o site e aparece para todo o time. Se a chave estiver errada ou a planilha fora do ar, ele fica salvo só neste navegador, em “Meus modelos”, com o botão “Publicar no site” para tentar de novo.</p>
         </div>
         <div>
           <p class="legend" style="margin-bottom:0.4rem">Prévia</p>
@@ -625,57 +629,51 @@
       return `<p class="legend">${names.map((n, i) => `<code>{{${i + 1}}}</code> ${esc(n)}`).join(" · ")}</p>`;
     }
 
-    // Modelos compartilhados: um arquivo .json por modelo na pasta abaixo do repositório do site
-    const REPO = "marcosilvat/marcosilvat.github.io";
-    const BRANCH = "main";
-    const SHARED_DIR = "modelos-compartilhados";
-    const CACHE_KEY = "chatmix-modelos-time";
+    // Modelos do time ficam numa planilha Google (ver planilha-modelos.gs).
+    // Cole aqui a URL do App da Web do Apps Script (termina em /exec):
+    const SHEET_URL = "";
+    const KEY_STORAGE = "chatmix-chave-time";
     let sharedModels = [];
+    const sharedStatus = () => document.getElementById("shared-status");
 
-    // Arquivo vem de fora da página: só aceita os campos conhecidos
+    // Dado vem de fora da página: só aceita os campos conhecidos
     function cleanModel(raw) {
       if (!raw || typeof raw !== "object") return null;
-      const str = v => (typeof v === "string" ? v.slice(0, 1500) : "");
+      const str = v => (v == null ? "" : String(v)).slice(0, 1500);
+      const yes = v => v === true || String(v).toLowerCase() === "true";
       const m = {
-        title: str(raw.title), cat: GROUPS[raw.cat] && raw.cat !== "meus" ? raw.cat : "aviso",
-        text: str(raw.text), vars: str(raw.vars), button: str(raw.button),
-        ref: raw.ref === true, pdf: raw.pdf === true, pix: raw.pix === true, barcode: raw.barcode === true
+        title: str(raw.title).trim(), cat: GROUPS[raw.cat] && raw.cat !== "meus" ? raw.cat : "aviso",
+        text: str(raw.text).trim(), vars: str(raw.vars), button: str(raw.button),
+        ref: yes(raw.ref), pdf: yes(raw.pdf), pix: yes(raw.pix), barcode: yes(raw.barcode)
       };
       return m.title && m.text ? m : null;
     }
 
+    function teamKey() {
+      try { return localStorage.getItem(KEY_STORAGE) || ""; } catch { return ""; }
+    }
+
     async function loadShared() {
+      if (!SHEET_URL) { sharedStatus().textContent = "Modelos do time ainda não configurados (falta ligar a planilha)."; return; }
       try {
-        const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
-        if (cached && Date.now() - cached.at < 5 * 60 * 1000) { sharedModels = cached.list; return render(); }
-      } catch {}
-      try {
-        // shortcut: API pública do GitHub tem limite de 60 consultas/hora por IP; o cache de 5 min evita estourar
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${SHARED_DIR}?ref=${BRANCH}`);
-        if (res.status === 404) { sharedModels = []; return render(); }
-        if (!res.ok) throw new Error(res.status);
-        const files = (await res.json()).filter(f => f.type === "file" && f.name.endsWith(".json"));
-        const list = await Promise.all(files.map(async f => {
-          try { const m = cleanModel(await (await fetch(f.download_url)).json()); return m && { ...m, sharedPath: f.path }; }
-          catch { return null; }
-        }));
-        sharedModels = list.filter(Boolean);
-        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), list: sharedModels })); } catch {}
+        const data = await (await fetch(SHEET_URL)).json();
+        sharedModels = (data.modelos || []).map(r => { const m = cleanModel(r); return m && { ...m, sharedId: String(r.id) }; }).filter(Boolean);
+        sharedStatus().textContent = "";
       } catch {
-        document.getElementById("shared-status").textContent = "Não foi possível carregar os modelos do time agora. Tente recarregar a página em alguns minutos.";
+        sharedStatus().textContent = "Não foi possível carregar os modelos do time agora. Tente recarregar a página.";
       }
       render();
     }
 
-    function slug(t) {
-      return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) || "modelo";
-    }
-
-    function publishUrl(m) {
-      const data = cleanModel(m);
-      const file = `${SHARED_DIR}/${slug(m.title)}-${Date.now().toString(36)}.json`;
-      const params = new URLSearchParams({ filename: file, value: JSON.stringify(data, null, 2) + "\n", message: `Modelo: ${data.title}` });
-      return `https://github.com/${REPO}/new/${BRANCH}?${params}`;
+    // text/plain evita a checagem prévia (preflight) que o Apps Script não responde
+    async function sendToSheet(payload) {
+      if (!SHEET_URL) throw new Error("Planilha ainda não configurada");
+      const key = teamKey();
+      if (!key) throw new Error("Informe a chave do time");
+      const res = await fetch(SHEET_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ ...payload, chave: key }) });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.erro || "Erro ao gravar na planilha");
+      return data;
     }
 
     function render() {
@@ -698,14 +696,14 @@
         <div class="grid">
           ${groups[g].map(m => `
             <article class="card">
-              <div class="card-head"><h3>${esc(m.title)}</h3><div class="chips">${m.sharedPath ? `<span class="chip chip-team">Do time</span>` : ""}${chips(m)}</div></div>
+              <div class="card-head"><h3>${esc(m.title)}</h3><div class="chips">${m.sharedId ? `<span class="chip chip-team">Do time</span>` : ""}${chips(m)}</div></div>
               ${preview(m)}
               ${legend(m)}
               <div class="card-actions">
                 <button type="button" class="btn-sm" data-copy="${esc(m.text)}">Copiar texto</button>
                 ${m.customIndex === undefined ? "" : `<button type="button" class="btn-sm btn-pub" data-pub="${m.customIndex}">Publicar no site</button>
                 <button type="button" class="btn-sm" data-del="${m.customIndex}">Excluir</button>`}
-                ${m.sharedPath ? `<a class="btn-sm" href="https://github.com/${REPO}/delete/${BRANCH}/${encodeURI(m.sharedPath)}" target="_blank" rel="noopener">Remover do site</a>` : ""}
+                ${m.sharedId ? `<button type="button" class="btn-sm" data-unshare="${esc(m.sharedId)}">Remover do site</button>` : ""}
               </div>
             </article>`).join("")}
         </div>`).join("");
@@ -733,8 +731,23 @@
       }
       const pub = e.target.closest("[data-pub]");
       if (pub) {
-        const m = loadCustom()[Number(pub.dataset.pub)];
-        if (m) window.open(publishUrl(m), "_blank", "noopener");
+        const i = Number(pub.dataset.pub);
+        const m = loadCustom()[i];
+        if (!m) return;
+        pub.disabled = true;
+        pub.textContent = "Publicando…";
+        sendToSheet({ modelo: m })
+          .then(() => { const list = loadCustom(); list.splice(i, 1); saveCustom(list); return loadShared(); })
+          .catch(err => { pub.disabled = false; pub.textContent = "Publicar no site"; sharedStatus().textContent = err.message; });
+        return;
+      }
+      const unshare = e.target.closest("[data-unshare]");
+      if (unshare) {
+        if (!confirm("Remover este modelo do site para todo o time?")) return;
+        unshare.disabled = true;
+        sendToSheet({ acao: "excluir", id: unshare.dataset.unshare })
+          .then(loadShared)
+          .catch(err => { unshare.disabled = false; sharedStatus().textContent = err.message; });
         return;
       }
       const del = e.target.closest("[data-del]");
@@ -777,17 +790,37 @@
 
     Object.values(form).forEach(el => { el.addEventListener("input", updatePreview); el.addEventListener("change", updatePreview); });
 
-    document.getElementById("m-save").addEventListener("click", () => {
-      const m = readForm();
-      if (!m.title || !m.text) { feedback.textContent = "Preencha o nome e o texto"; return; }
-      const list = loadCustom();
-      list.push(m);
-      if (!saveCustom(list)) { feedback.textContent = "Não foi possível salvar neste navegador"; return; }
+    const keyInput = document.getElementById("m-key");
+    keyInput.value = teamKey();
+    keyInput.addEventListener("change", () => { try { localStorage.setItem(KEY_STORAGE, keyInput.value.trim()); } catch {} });
+
+    function clearForm() {
       Object.values(form).forEach(el => { if (el.type === "checkbox") el.checked = false; else if (el.tagName !== "SELECT") el.value = ""; });
       updatePreview();
-      feedback.textContent = "Salvo em “Meus modelos”. Use “Publicar no site” para mostrar ao time.";
-      setTimeout(() => { feedback.textContent = ""; }, 2500);
-      render();
+    }
+
+    document.getElementById("m-save").addEventListener("click", async () => {
+      const m = readForm();
+      if (!m.title || !m.text) { feedback.textContent = "Preencha o nome e o texto"; return; }
+      try { localStorage.setItem(KEY_STORAGE, keyInput.value.trim()); } catch {}
+      const btn = document.getElementById("m-save");
+      btn.disabled = true;
+      feedback.textContent = "Publicando…";
+      try {
+        await sendToSheet({ modelo: m });
+        clearForm();
+        feedback.textContent = "Publicado no site para todo o time.";
+        await loadShared();
+      } catch (err) {
+        const list = loadCustom();
+        list.push(m);
+        saveCustom(list);
+        clearForm();
+        feedback.textContent = `Não publicou (${err.message}). Ficou salvo só neste navegador, em “Meus modelos”.`;
+        render();
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     updatePreview();

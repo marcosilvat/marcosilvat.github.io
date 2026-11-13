@@ -227,7 +227,6 @@
     .gen-subtab.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(49, 94, 214, 0.35); font-weight: 700; }
 
     .media-type { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.86rem; font-weight: 600; color: var(--muted); }
-    .toggle-item.is-disabled { opacity: 0.5; cursor: not-allowed; }
     .gen-output-wrap {
       padding-top: 1.15rem;
       border-top: 1px solid var(--border);
@@ -505,10 +504,6 @@
               <option value="video">Vídeo</option>
               <option value="audio">Áudio</option>
             </select>
-          </label>
-          <label class="toggle-item" id="radius-wrap" title="Sem mídia, o RadiusNet usa a template com final _nofile">
-            <input type="checkbox" id="chk-radius">
-            Enviado via RadiusNet
           </label>
         </div>
       </div>
@@ -829,10 +824,8 @@
     const chkBarcode = document.getElementById("chk-barcode");
     const chkPix = document.getElementById("chk-pix");
     const chkPdf = document.getElementById("chk-pdf");
-    const chkRadius = document.getElementById("chk-radius");
     const selHeaderType = document.getElementById("sel-header-type");
     const mediaTypeWrap = document.getElementById("media-type-wrap");
-    const radiusWrap = document.getElementById("radius-wrap");
     const inpPix = document.getElementById("inp-pix");
     const inpBarcode = document.getElementById("inp-barcode");
     const inpPrice = document.getElementById("inp-price");
@@ -918,15 +911,12 @@
     function updateGenerator() {
       const pix = chkPix.checked, barcode = chkBarcode.checked, media = chkPdf.checked;
       const details = pix || barcode; // "detalhes do pedido": só existe com Pix e/ou boleto
-      const radius = chkRadius.checked && !media; // RadiusNet só vale para template sem mídia
       const prodName = inpProdName.value.trim();
       const bizName = inpBizName.value.trim();
       const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
       const type = details ? templateType(pix, barcode) : null;
 
       mediaTypeWrap.hidden = !media;
-      chkRadius.disabled = media;
-      radiusWrap.classList.toggle("is-disabled", media);
       typeInfo.textContent = type || "sem detalhes do pedido";
 
       const parts = [`variables=${vars.join("|")}`];
@@ -942,7 +932,7 @@
         if (bizName) parts.push(`business_name=${bizName}`);
         parts.push(`ref_template=${inpRef.value.trim()}`);
       }
-      parts.push(`template=${inpTplId.value.trim()}${radius ? "_nofile" : ""}`);
+      parts.push(`template=${inpTplId.value.trim()}`);
       if (details) parts.push(`type_template=${type}`);
       if (media && details) parts.push("pdf_in_hsm=true");
 
@@ -990,7 +980,7 @@
 
     erpPresetSelect.addEventListener("change", () => applyErpPreset(erpPresetSelect.value));
 
-    [inpVars, inpProdName, inpBizName, inpTplId, inpPix, inpBarcode, inpPrice, inpRef, inpLink, chkBarcode, chkPix, chkPdf, chkRadius, selHeaderType].forEach(el => {
+    [inpVars, inpProdName, inpBizName, inpTplId, inpPix, inpBarcode, inpPrice, inpRef, inpLink, chkBarcode, chkPix, chkPdf, selHeaderType].forEach(el => {
       el.addEventListener("input", updateGenerator);
       el.addEventListener("change", updateGenerator);
     });
