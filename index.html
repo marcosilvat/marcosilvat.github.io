@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guia de Variáveis e Gerador de Templates — RBX, IXC, SGP, HubSoft + ChatMix</title>
+  <title>Guia de Variáveis e Gerador de Templates — RBX, IXC, SGP e HubSoft</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -453,7 +453,6 @@
     .erp-ixc { background: rgba(56, 189, 248, 0.16); color: #38bdf8; }
     .erp-sgp { background: rgba(34, 197, 94, 0.16); color: #4ade80; }
     .erp-hubsoft { background: rgba(168, 85, 247, 0.16); color: #c084fc; }
-    .erp-chatmix { background: rgba(234, 179, 8, 0.16); color: #facc15; }
 
     .cat-tag {
       font-size: 0.75rem;
@@ -500,9 +499,9 @@
 <body>
   <div class="container">
     <header>
-      <span class="badge-top">Referência Rápida • ERPs ISP &amp; ChatMix Meta</span>
+      <span class="badge-top">Referência Rápida • ERPs ISP</span>
       <h1>Padrão de Variáveis para Provedores (ISP)</h1>
-      <p>Consulte as variáveis nativas do <strong>RBX ISP</strong>, <strong>IXC Soft</strong>, <strong>SGP</strong> e <strong>HubSoft</strong>, confira o delimitador de cada sistema e monte templates do ChatMix sem erros.</p>
+      <p>Consulte as variáveis nativas do <strong>RBX ISP</strong>, <strong>IXC Soft</strong>, <strong>SGP</strong> e <strong>HubSoft</strong>, confira o delimitador de cada sistema e monte templates sem erros.</p>
     </header>
 
     <!-- Padrão de Delimitadores por ERP -->
@@ -512,7 +511,7 @@
           <h3>RBX ISP (RouterBox)</h3>
           <span class="syntax-pill" style="color: #fb923c;">|VARIAVEL|</span>
         </div>
-        <p>Usa barras verticais simples em caixa alta. No ChatMix exige <code>|||</code> após variáveis do RBX.</p>
+        <p>Usa barras verticais simples em caixa alta. Exige <code>|||</code> após variáveis ao separar parâmetros com <code>||</code>.</p>
       </div>
 
       <div class="syntax-card">
@@ -540,11 +539,11 @@
       </div>
     </section>
 
-    <!-- Regra dos Pipes no RBX + ChatMix -->
+    <!-- Regra dos Pipes no RBX -->
     <section class="rules-grid" aria-label="Regras de barras verticais no RBX">
       <div class="rule-card">
         <h3>1. RBX: Variável seguida de parâmetro <span class="pipe-badge">||| (3 barras)</span></h3>
-        <p>O RBX consome a barra que fecha a variável (ex.: <code>|LINHA_DIGITAVEL|</code>). Coloque <strong>3 barras</strong> para sobrarem 2 (<code>||</code>) para o ChatMix:</p>
+        <p>O RBX consome a barra que fecha a variável (ex.: <code>|LINHA_DIGITAVEL|</code>). Coloque <strong>3 barras</strong> para sobrarem 2 (<code>||</code>) de separação:</p>
         <div class="rule-example">
           product_pix_code=<span class="hl-var">|PIX_COPIA_E_COLA|</span><span class="hl-sep">||</span>product_name=...
         </div>
@@ -570,7 +569,7 @@
     <!-- Gerador Interativo -->
     <section class="generator-section" aria-labelledby="gen-title">
       <div class="section-title">
-        <span id="gen-title">⚡ Gerador de Template ChatMix Meta</span>
+        <span id="gen-title">⚡ Gerador de Template</span>
         <label class="erp-preset-wrap">
           ERP Base:
           <select id="erp-preset" class="erp-preset-select">
@@ -643,7 +642,6 @@
           <button type="button" class="tab-btn" data-erp="ixc">IXC Soft</button>
           <button type="button" class="tab-btn" data-erp="sgp">SGP</button>
           <button type="button" class="tab-btn" data-erp="hubsoft">HubSoft</button>
-          <button type="button" class="tab-btn" data-erp="chatmix">ChatMix Meta</button>
         </div>
 
         <div class="tabs-row" id="cat-tabs">
@@ -652,7 +650,6 @@
           <button type="button" class="tab-btn" data-cat="financeiro">Financeiro / Fatura</button>
           <button type="button" class="tab-btn" data-cat="cliente">Cliente / Cadastro</button>
           <button type="button" class="tab-btn" data-cat="contrato">Contrato / Rede / Msg</button>
-          <button type="button" class="tab-btn" data-cat="chatmix">Parâmetros ChatMix</button>
         </div>
       </div>
 
@@ -765,18 +762,7 @@
       { code: "[[numero_fatura]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número identificador da fatura gerada", cat: "financeiro", catLabel: "Financeiro", example: "2026110045" },
       { code: "[[id_fatura]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "ID interno da fatura no banco de dados do HubSoft", cat: "financeiro", catLabel: "Financeiro", example: "99812" },
       { code: "[[mensagem]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Variável de texto da mensagem em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "Texto formatado no layout" },
-      { code: "[[numero]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número do telefone de destino em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "5544999999999" },
-
-      // ================= CHATMIX META =================
-      { code: "variables=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Lista de variáveis do corpo do template na Meta ({{1}}, {{2}}...)", cat: "chatmix", catLabel: "ChatMix Meta", example: "variables=|NOME|||DOCUMENTO_VENCIMENTO|" },
-      { code: "product_bar_code=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Envia a linha digitável para o botão de copiar código de barras", cat: "chatmix", catLabel: "ChatMix Meta", example: "product_bar_code=|LINHA_DIGITAVEL|" },
-      { code: "product_pix_code=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Envia a chave Pix Copia e Cola para o botão de pagamento Pix", cat: "chatmix", catLabel: "ChatMix Meta", example: "product_pix_code=|PIX_COPIA_E_COLA|" },
-      { code: "product_name=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Título/nome do produto ou fatura exibido no card da mensagem", cat: "chatmix", catLabel: "ChatMix Meta", example: "product_name=Fatura WconectPR" },
-      { code: "product_price=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Valor total exibido no detalhe da cobrança (opcional conforme template)", cat: "chatmix", catLabel: "ChatMix Meta", example: "product_price=|DOCUMENTO_VALOR_TOTAL|" },
-      { code: "business_name=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Nome da empresa/provedor remetente", cat: "chatmix", catLabel: "ChatMix Meta", example: "business_name=WconectPR" },
-      { code: "ref_template=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Identificador de referência do documento para rastreio", cat: "chatmix", catLabel: "ChatMix Meta", example: "ref_template=|DOCUMENTO_NUMERO|" },
-      { code: "template=", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Código numérico do template cadastrado no ChatMix", cat: "chatmix", catLabel: "ChatMix Meta", example: "template=10361" },
-      { code: "type_template=multi", erp: "chatmix", erpLabel: "ChatMix Meta", desc: "Define o formato de template interativo/múltiplos botões no ChatMix", cat: "chatmix", catLabel: "ChatMix Meta", example: "type_template=multi" }
+      { code: "[[numero]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número do telefone de destino em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "5544999999999" }
     ];
 
     const tbody = document.getElementById("vars-tbody");
