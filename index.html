@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia de Variáveis e Gerador de Templates — RBX ISP + ChatMix</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #263449;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-dark: #0284c7;
+      --accent: #f97316;
+      --success: #22c55e;
+      --code-bg: #090d16;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge-top {
+      display: inline-block;
+      background: rgba(249, 115, 22, 0.15);
+      color: #fb923c;
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 3vw, 2.25rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Regra dos Pipes Card */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .rule-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pipe-badge {
+      font-family: monospace;
+      background: var(--code-bg);
+      color: var(--primary);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .rule-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .rule-example {
+      font-family: monospace;
+      font-size: 0.82rem;
+      background: var(--code-bg);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      color: #e2e8f0;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .hl-var { color: #38bdf8; font-weight: 700; }
+    .hl-sep { color: #f97316; font-weight: 700; }
+
+    /* Gerador de Template */
+    .generator-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .toggles-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding: 0.85rem;
+      background: rgba(9, 13, 22, 0.5);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .toggle-item input {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .output-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+      color: #38bdf8;
+      margin-bottom: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 0.65rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn:hover {
+      background: #7dd3fc;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .copy-feedback {
+      font-size: 0.85rem;
+      color: var(--success);
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .copy-feedback.show {
+      opacity: 1;
+    }
+
+    /* Filtro e Tabela de Variáveis */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 0.65rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.9rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(9, 13, 22, 0.6);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface-hover);
+    }
+
+    .var-code {
+      font-family: monospace;
+      font-size: 0.92rem;
+      color: var(--primary);
+      background: var(--code-bg);
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    .cat-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .cat-financeiro { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .cat-cliente { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .cat-contrato { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-chatmix { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+
+    .btn-copy-sm {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-copy-sm:hover {
+      color: var(--text);
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    @media (max-width: 720px) {
+      th:nth-child(3), td:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge-top">Referência Rápida • RBX ISP &amp; ChatMix Meta</span>
+      <h1>Padrão de Variáveis e Templates do RBX ISP</h1>
+      <p>Consulte todas as variáveis nativas do RouterBox (RBX ISP), entenda a regra dos separadores (pipes <code>|</code>) e gere seu código de integração sem erros.</p>
+    </header>
+
+    <!-- Regra dos Pipes -->
+    <section class="rules-grid" aria-label="Regras de barras verticais">
+      <div class="rule-card">
+        <h3>1. Variável do RBX seguida de outro campo <span class="pipe-badge">||| (3 barras)</span></h3>
+        <p>O RBX consome a barra que fecha a variável (ex.: <code>|LINHA_DIGITAVEL|</code>). Por isso, coloque <strong>3 barras</strong> para que sobrem 2 barras (<code>||</code>) para o ChatMix:</p>
+        <div class="rule-example">
+          product_pix_code=<span class="hl-var">|PIX_COPIA_E_COLA|</span><span class="hl-sep">||</span>product_name=...
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <h3>2. Texto Fixo seguido de outro campo <span class="pipe-badge">|| (2 barras)</span></h3>
+        <p>Quando o valor não é uma variável do RBX (ex.: nome do provedor ou número da template), o RBX não consome barras. Use apenas <strong>2 barras</strong>:</p>
+        <div class="rule-example">
+          business_name=WconectPR<span class="hl-sep">||</span>template=10361<span class="hl-sep">||</span>type_template=multi
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <h3>3. Entre variáveis dentro de <code>variables=</code> <span class="pipe-badge">||| (3 barras)</span></h3>
+        <p>Para separar <code>{{1}}</code> e <code>{{2}}</code> por 1 barra (<code>|</code>): 1 barra fecha a 1ª variável + 1 barra separa + 1 barra abre a 2ª variável:</p>
+        <div class="rule-example">
+          variables=<span class="hl-var">|NOME|</span><span class="hl-sep">|</span><span class="hl-var">|DOCUMENTO_VENCIMENTO|</span><span class="hl-sep">||</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gerador Interativo -->
+    <section class="generator-section" aria-labelledby="gen-title">
+      <div class="section-title">
+        <span id="gen-title">⚡ Gerador de Template RBX ISP + ChatMix Meta</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="inp-vars">Variáveis do Corpo (separadas por vírgula)</label>
+          <input type="text" id="inp-vars" value="|NOME|, |DOCUMENTO_VENCIMENTO|">
+        </div>
+        <div class="form-group">
+          <label for="inp-prod-name">Nome da Fatura (<code>product_name</code>)</label>
+          <input type="text" id="inp-prod-name" value="Fatura WconectPR">
+        </div>
+        <div class="form-group">
+          <label for="inp-biz-name">Nome da Empresa (<code>business_name</code>)</label>
+          <input type="text" id="inp-biz-name" value="WconectPR">
+        </div>
+        <div class="form-group">
+          <label for="inp-tpl-id">Código da Template (<code>template</code>)</label>
+          <input type="text" id="inp-tpl-id" value="10361">
+        </div>
+      </div>
+
+      <div class="toggles-row">
+        <label class="toggle-item">
+          <input type="checkbox" id="chk-barcode">
+          Incluir Código de Barras (<code>product_bar_code=|LINHA_DIGITAVEL|</code>)
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="chk-pix" checked>
+          Incluir Pix Copia e Cola (<code>product_pix_code=|PIX_COPIA_E_COLA|</code>)
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="chk-price">
+          Incluir Valor da Fatura (<code>product_price=|DOCUMENTO_VALOR_TOTAL|</code>)
+        </label>
+        <label class="toggle-item">
+          <input type="checkbox" id="chk-ref" checked>
+          Incluir Referência (<code>ref_template=|DOCUMENTO_NUMERO|</code>)
+        </label>
+      </div>
+
+      <div class="output-box" id="template-output"></div>
+
+      <div class="btn-row">
+        <button type="button" class="btn" id="btn-copy-template">Copiar Template Pronto</button>
+        <span class="copy-feedback" id="copy-feedback">✓ Copiado para a área de transferência!</span>
+      </div>
+    </section>
+
+    <!-- Catálogo de Variáveis -->
+    <section aria-label="Lista de Variáveis do RBX ISP">
+      <div class="filter-bar">
+        <input type="search" id="search-var" class="search-input" placeholder="Buscar variável (ex: PIX, VENCIMENTO, NOME, LINHA_DIGITAVEL)...">
+        <div class="category-tabs">
+          <button type="button" class="tab-btn active" data-cat="all">Todas</button>
+          <button type="button" class="tab-btn" data-cat="financeiro">Financeiro / Fatura</button>
+          <button type="button" class="tab-btn" data-cat="cliente">Cliente / Cadastro</button>
+          <button type="button" class="tab-btn" data-cat="contrato">Contrato / Rede</button>
+          <button type="button" class="tab-btn" data-cat="chatmix">Parâmetros ChatMix</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Variável / Parâmetro</th>
+              <th>Descrição no RBX ISP</th>
+              <th>Categoria</th>
+              <th>Exemplo de Valor</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="vars-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const variablesData = [
+      // Financeiro / Documento
+      {
+        code: "|DOCUMENTO_VENCIMENTO|",
+        desc: "Data de vencimento da fatura ou boleto em aberto",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "15/11/2026"
+      },
+      {
+        code: "|DOCUMENTO_VALOR_TOTAL|",
+        desc: "Valor monetário total do documento/fatura",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "99,90"
+      },
+      {
+        code: "|DOCUMENTO_NUMERO|",
+        desc: "Número identificador do documento ou título financeiro",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "458921"
+      },
+      {
+        code: "|LINHA_DIGITAVEL|",
+        desc: "Linha digitável numérica do código de barras do boleto",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "00190.00009 01234.567890..."
+      },
+      {
+        code: "|PIX_COPIA_E_COLA|",
+        desc: "Código Pix Copia e Cola (payload EMV do QR Code da fatura)",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "00020126580014br.gov.bcb.pix..."
+      },
+      {
+        code: "|LINK_BOLETO|",
+        desc: "URL direta para visualização/download do PDF do boleto",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "https://rbx.../boleto.pdf"
+      },
+      {
+        code: "|BARCODE|",
+        desc: "Representação do código de barras em integrações de API/SMS",
+        cat: "financeiro",
+        catLabel: "Financeiro",
+        example: "0019987650000009990..."
+      },
+
+      // Cliente / Cadastro
+      {
+        code: "|NOME|",
+        desc: "Nome completo ou Razão Social do assinante",
+        cat: "cliente",
+        catLabel: "Cliente",
+        example: "João da Silva"
+      },
+      {
+        code: "|CPF_CNPJ|",
+        desc: "Documento CPF ou CNPJ do cliente titular",
+        cat: "cliente",
+        catLabel: "Cliente",
+        example: "123.456.789-00"
+      },
+      {
+        code: "|CELULAR|",
+        desc: "Telefone celular do destinatário (usado em URLs de Gateway SMS)",
+        cat: "cliente",
+        catLabel: "Cliente",
+        example: "5544999999999"
+      },
+      {
+        code: "|ENDERECO|",
+        desc: "Endereço cadastrado do cliente",
+        cat: "cliente",
+        catLabel: "Cliente",
+        example: "Rua das Flores, 123"
+      },
+      {
+        code: "|USUARIO|",
+        desc: "Login/usuário de autenticação do cliente",
+        cat: "cliente",
+        catLabel: "Cliente",
+        example: "joaosilva.fibra"
+      },
+
+      // Contrato / Rede
+      {
+        code: "|CONTRATO|",
+        desc: "Número do contrato do cliente no RBX ISP",
+        cat: "contrato",
+        catLabel: "Contrato / Rede",
+        example: "10452"
+      },
+      {
+        code: "|PLANO|",
+        desc: "Nome comercial do plano de internet vinculado ao contrato",
+        cat: "contrato",
+        catLabel: "Contrato / Rede",
+        example: "Fibra 500 Mega"
+      },
+      {
+        code: "|NAS_IP|",
+        desc: "IP do concentrador (NAS) para notificações técnicas",
+        cat: "contrato",
+        catLabel: "Contrato / Rede",
+        example: "172.16.0.1"
+      },
+      {
+        code: "|MENSAGEM|",
+        desc: "Corpo da mensagem processada (usado na configuração do Gateway SMS)",
+        cat: "contrato",
+        catLabel: "Contrato / Rede",
+        example: "Texto completo do disparo"
+      },
+
+      // Parâmetros ChatMix Meta
+      {
+        code: "variables=",
+        desc: "Lista de variáveis do corpo do template na Meta ({{1}}, {{2}}...)",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "variables=|NOME|||DOCUMENTO_VENCIMENTO|"
+      },
+      {
+        code: "product_bar_code=",
+        desc: "Envia a linha digitável para o botão de copiar código de barras",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "product_bar_code=|LINHA_DIGITAVEL|"
+      },
+      {
+        code: "product_pix_code=",
+        desc: "Envia a chave Pix Copia e Cola para o botão de pagamento Pix",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "product_pix_code=|PIX_COPIA_E_COLA|"
+      },
+      {
+        code: "product_name=",
+        desc: "Título/nome do produto ou fatura exibido no card da mensagem",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "product_name=Fatura WconectPR"
+      },
+      {
+        code: "product_price=",
+        desc: "Valor total exibido no detalhe da cobrança (opcional conforme template)",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "product_price=|DOCUMENTO_VALOR_TOTAL|"
+      },
+      {
+        code: "business_name=",
+        desc: "Nome da empresa/provedor remetente",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "business_name=WconectPR"
+      },
+      {
+        code: "ref_template=",
+        desc: "Identificador de referência do documento para rastreio",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "ref_template=|DOCUMENTO_NUMERO|"
+      },
+      {
+        code: "template=",
+        desc: "Código numérico do template cadastrado no ChatMix",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "template=10361"
+      },
+      {
+        code: "type_template=multi",
+        desc: "Define o formato de template interativo/múltiplos botões no ChatMix",
+        cat: "chatmix",
+        catLabel: "ChatMix Meta",
+        example: "type_template=multi"
+      }
+    ];
+
+    const tbody = document.getElementById("vars-tbody");
+    const searchInput = document.getElementById("search-var");
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    let currentCategory = "all";
+
+    function renderTable() {
+      const query = searchInput.value.trim().toLowerCase();
+      tbody.innerHTML = "";
+
+      const filtered = variablesData.filter(item => {
+        const matchesCat = currentCategory === "all" || item.cat === currentCategory;
+        const matchesQuery =
+          item.code.toLowerCase().includes(query) ||
+          item.desc.toLowerCase().includes(query) ||
+          item.catLabel.toLowerCase().includes(query);
+        return matchesCat && matchesQuery;
+      });
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="var-code">${item.code}</span></td>
+          <td>${item.desc}</td>
+          <td><span class="cat-tag cat-${item.cat}">${item.catLabel}</span></td>
+          <td style="color: var(--muted); font-family: monospace; font-size: 0.82rem;">${item.example}</td>
+          <td><button type="button" class="btn-copy-sm" data-copy="${item.code}">Copiar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+      } finally {
+        document.body.removeChild(textArea);
+      }
+      return Promise.resolve();
+    }
+
+    tbody.addEventListener("click", e => {
+      const btn = e.target.closest(".btn-copy-sm");
+      if (!btn) return;
+      const text = btn.getAttribute("data-copy");
+      copyToClipboard(text);
+      const original = btn.textContent;
+      btn.textContent = "Copiado!";
+      btn.style.borderColor = "var(--success)";
+      btn.style.color = "var(--success)";
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.style.borderColor = "";
+        btn.style.color = "";
+      }, 1400);
+    });
+
+    searchInput.addEventListener("input", renderTable);
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentCategory = btn.getAttribute("data-cat");
+        renderTable();
+      });
+    });
+
+    // Gerador de Template
+    const inpVars = document.getElementById("inp-vars");
+    const inpProdName = document.getElementById("inp-prod-name");
+    const inpBizName = document.getElementById("inp-biz-name");
+    const inpTplId = document.getElementById("inp-tpl-id");
+    const chkBarcode = document.getElementById("chk-barcode");
+    const chkPix = document.getElementById("chk-pix");
+    const chkPrice = document.getElementById("chk-price");
+    const chkRef = document.getElementById("chk-ref");
+    const outputBox = document.getElementById("template-output");
+    const btnCopyTemplate = document.getElementById("btn-copy-template");
+    const copyFeedback = document.getElementById("copy-feedback");
+
+    function updateGenerator() {
+      const rawVars = inpVars.value
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const joinedVars = rawVars.join("|");
+      const parts = [`variables=${joinedVars}`];
+
+      if (chkBarcode.checked) {
+        parts.push("product_bar_code=|LINHA_DIGITAVEL|");
+      }
+      if (chkPix.checked) {
+        parts.push("product_pix_code=|PIX_COPIA_E_COLA|");
+      }
+      if (inpProdName.value.trim()) {
+        parts.push(`product_name=${inpProdName.value.trim()}`);
+      }
+      if (chkPrice.checked) {
+        parts.push("product_price=|DOCUMENTO_VALOR_TOTAL|");
+      }
+      if (inpBizName.value.trim()) {
+        parts.push(`business_name=${inpBizName.value.trim()}`);
+      }
+      if (chkRef.checked) {
+        parts.push("ref_template=|DOCUMENTO_NUMERO|");
+      }
+      if (inpTplId.value.trim()) {
+        parts.push(`template=${inpTplId.value.trim()}`);
+      }
+      parts.push("type_template=multi");
+
+      // Junta cada parte com "||" (se a parte anterior já terminar em "|", automaticamente vira "|||")
+      outputBox.textContent = parts.join("||");
+    }
+
+    [inpVars, inpProdName, inpBizName, inpTplId, chkBarcode, chkPix, chkPrice, chkRef].forEach(el => {
+      el.addEventListener("input", updateGenerator);
+      el.addEventListener("change", updateGenerator);
+    });
+
+    btnCopyTemplate.addEventListener("click", () => {
+      copyToClipboard(outputBox.textContent);
+      copyFeedback.classList.add("show");
+      setTimeout(() => copyFeedback.classList.remove("show"), 2000);
+    });
+
+    renderTable();
+    updateGenerator();
+  </script>
+</body>
+</html>
