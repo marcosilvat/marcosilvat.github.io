@@ -186,6 +186,9 @@
     .toggle-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
     .toggle-item code { color: var(--muted); font-weight: 500; }
 
+    .save-row { margin: -0.25rem 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .save-row input { min-width: 240px; }
+
     .type-info { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.5rem; }
     .type-info strong { color: var(--text); }
 
@@ -276,6 +279,7 @@
     .erp-ixc { background: #e6f1fb; color: #1f5f99; }
     .erp-sgp { background: #e5f4ea; color: #1f7a45; }
     .erp-hubsoft { background: #efeafb; color: #5b3fb0; }
+    .erp-mkauth { background: #fbe9ef; color: #a3264f; }
     .cat-tag { background: #eef2f5; color: var(--muted); font-weight: 600; }
 
     .btn-copy-sm {
@@ -311,7 +315,7 @@
   <div class="container">
     <header class="intro">
       <h1>Código de disparo</h1>
-      <p>Monte o código de disparo da fatura para RBX ISP, IXC Soft, SGP e HubSoft e consulte as variáveis de cada sistema.</p>
+      <p>Monte o código de disparo da fatura para RBX ISP, IXC Soft, SGP, HubSoft e MK-AUTH e consulte as variáveis de cada sistema.</p>
     </header>
 
     <!-- Padrão de Delimitadores por ERP -->
@@ -346,6 +350,14 @@
           <span class="syntax-pill">[[variavel]]</span>
         </div>
         <p>Usa colchetes duplos (<code>[[ ]]</code>) em minúsculas (ex.: <code>[[nome]]</code>, <code>[[valor]]</code>).</p>
+      </div>
+
+      <div class="syntax-card">
+        <div class="syntax-card-header">
+          <h3>MK-AUTH</h3>
+          <span class="syntax-pill">%variavel%</span>
+        </div>
+        <p>Usa porcentagem (<code>%</code>) no início e no fim (ex.: <code>%nomecliente%</code>, <code>%valortitulo%</code>).</p>
       </div>
     </section>
 
@@ -387,8 +399,42 @@
             <option value="ixc">IXC Soft (#variavel#)</option>
             <option value="sgp" selected>SGP ({variavel})</option>
             <option value="hubsoft">HubSoft ([[variavel]])</option>
+            <option value="mkauth">MK-AUTH (%variavel%)</option>
+            <optgroup label="Cadastrados" id="custom-group"></optgroup>
+            <option value="manual">Genérico (preencher manualmente)</option>
           </select>
         </label>
+      </div>
+
+      <p class="type-info">Variáveis do sistema. Mude qualquer campo à mão, se precisar.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="inp-pix">Código Pix (<code>product_pix_code</code>)</label>
+          <input type="text" id="inp-pix" placeholder="ex.: {codigopix}">
+        </div>
+        <div class="form-group">
+          <label for="inp-barcode">Linha digitável (<code>product_bar_code</code>)</label>
+          <input type="text" id="inp-barcode" placeholder="ex.: {linhadigitavel}">
+        </div>
+        <div class="form-group">
+          <label for="inp-price">Valor (<code>product_price</code>)</label>
+          <input type="text" id="inp-price" placeholder="ex.: {valor}">
+        </div>
+        <div class="form-group">
+          <label for="inp-ref">Número da fatura (<code>ref_template</code>)</label>
+          <input type="text" id="inp-ref" placeholder="ex.: {titulo}">
+        </div>
+        <div class="form-group">
+          <label for="inp-link">Link do PDF (<code>header_link</code>)</label>
+          <input type="text" id="inp-link" placeholder="ex.: {link}">
+        </div>
+      </div>
+
+      <div class="btn-row save-row">
+        <input type="text" id="inp-sys-name" class="erp-preset-select" placeholder="Nome do sistema (ex.: RadiusNet)">
+        <button type="button" class="btn-copy-sm" id="btn-save-sys">Salvar sistema</button>
+        <button type="button" class="btn-copy-sm" id="btn-del-sys" hidden>Excluir sistema</button>
+        <span class="copy-feedback" id="save-feedback">Salvo</span>
       </div>
 
       <div class="form-grid">
@@ -413,15 +459,15 @@
       <div class="toggles-row">
         <label class="toggle-item">
           <input type="checkbox" id="chk-pix" checked>
-          Código Pix <code id="lbl-pix"></code>
+          Código Pix
         </label>
         <label class="toggle-item">
           <input type="checkbox" id="chk-barcode">
-          Código de barras <code id="lbl-barcode"></code>
+          Código de barras
         </label>
         <label class="toggle-item">
           <input type="checkbox" id="chk-pdf">
-          PDF <code id="lbl-pdf"></code>
+          PDF
         </label>
       </div>
 
@@ -449,6 +495,7 @@
           <button type="button" class="tab-btn" data-erp="ixc">IXC Soft</button>
           <button type="button" class="tab-btn" data-erp="sgp">SGP</button>
           <button type="button" class="tab-btn" data-erp="hubsoft">HubSoft</button>
+          <button type="button" class="tab-btn" data-erp="mkauth">MK-AUTH</button>
         </div>
 
         <div class="tabs-row" id="cat-tabs">
@@ -511,6 +558,15 @@
         price: "[[valor]]",
         ref: "[[numero_fatura]]",
         pdf: "[[link_fatura]]"
+      },
+      mkauth: {
+        vars: "%nomecliente%, %valortitulo%, %vencimento%",
+        barcode: "%linhadig%",
+        pix: "%copiacola%",
+        price: "%valortitulo%",
+        ref: "%numerotitulo%",
+        // MK-AUTH não tem variável de link: o endereço do boleto é montado com o domínio do provedor
+        pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%"
       }
     };
 
@@ -573,7 +629,16 @@
       { code: "[[numero_fatura]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número identificador da fatura gerada", cat: "financeiro", catLabel: "Financeiro", example: "2026110045" },
       { code: "[[id_fatura]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "ID interno da fatura no banco de dados do HubSoft", cat: "financeiro", catLabel: "Financeiro", example: "99812" },
       { code: "[[mensagem]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Variável de texto da mensagem em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "Texto formatado no layout" },
-      { code: "[[numero]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número do telefone de destino em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "5544999999999" }
+      { code: "[[numero]]", erp: "hubsoft", erpLabel: "HubSoft", desc: "Número do telefone de destino em integrações JSON", cat: "contrato", catLabel: "Contrato / Rede", example: "5544999999999" },
+
+      // ================= MK-AUTH =================
+      { code: "%nomecliente%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Nome do cliente", cat: "cliente", catLabel: "Cliente", example: "João da Silva" },
+      { code: "%logincliente%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Login do cliente (usado no link do boleto)", cat: "cliente", catLabel: "Cliente", example: "joaosilva" },
+      { code: "%numerotitulo%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Número do título/fatura", cat: "financeiro", catLabel: "Financeiro", example: "458921" },
+      { code: "%valortitulo%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Valor do título/fatura", cat: "financeiro", catLabel: "Financeiro", example: "99,90" },
+      { code: "%vencimento%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Data de vencimento do título", cat: "financeiro", catLabel: "Financeiro", example: "15/11/2026" },
+      { code: "%linhadig%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Linha digitável do boleto", cat: "financeiro", catLabel: "Financeiro", example: "00190.00009 01234.567890..." },
+      { code: "%copiacola%", erp: "mkauth", erpLabel: "MK-AUTH", desc: "Código Pix Copia e Cola", cat: "financeiro", catLabel: "Financeiro", example: "00020126580014br.gov.bcb.pix..." }
     ];
 
     const tbody = document.getElementById("vars-tbody");
@@ -684,25 +749,67 @@
     const chkBarcode = document.getElementById("chk-barcode");
     const chkPix = document.getElementById("chk-pix");
     const chkPdf = document.getElementById("chk-pdf");
-    const lblBarcode = document.getElementById("lbl-barcode");
-    const lblPix = document.getElementById("lbl-pix");
-    const lblPdf = document.getElementById("lbl-pdf");
+    const inpPix = document.getElementById("inp-pix");
+    const inpBarcode = document.getElementById("inp-barcode");
+    const inpPrice = document.getElementById("inp-price");
+    const inpRef = document.getElementById("inp-ref");
+    const inpLink = document.getElementById("inp-link");
+    const inpSysName = document.getElementById("inp-sys-name");
+    const btnSaveSys = document.getElementById("btn-save-sys");
+    const btnDelSys = document.getElementById("btn-del-sys");
+    const saveFeedback = document.getElementById("save-feedback");
+    const customGroup = document.getElementById("custom-group");
     const typeInfo = document.getElementById("type-info");
     const outputBox = document.getElementById("template-output");
     const btnCopyTemplate = document.getElementById("btn-copy-template");
     const copyFeedback = document.getElementById("copy-feedback");
 
+    // Sistemas cadastrados ficam no navegador de quem cadastrou (localStorage)
+    const STORAGE_KEY = "chatmix-sistemas";
+    erpPresets.manual = { vars: "", pix: "", barcode: "", price: "", ref: "", pdf: "" };
+
+    function loadCustom() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+    }
+
+    function saveCustom(data) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch { return false; }
+    }
+
+    function renderCustomOptions(selected) {
+      const custom = loadCustom();
+      customGroup.innerHTML = "";
+      Object.keys(custom).sort().forEach(name => {
+        erpPresets["custom:" + name] = custom[name];
+        const opt = document.createElement("option");
+        opt.value = "custom:" + name;
+        opt.textContent = name;
+        customGroup.appendChild(opt);
+      });
+      customGroup.hidden = !customGroup.children.length;
+      if (selected) erpPresetSelect.value = selected;
+    }
+
     function applyErpPreset(erpKey) {
-      inpVars.value = erpPresets[erpKey].vars;
+      const p = erpPresets[erpKey];
+      inpVars.value = p.vars;
+      inpPix.value = p.pix;
+      inpBarcode.value = p.barcode;
+      inpPrice.value = p.price;
+      inpRef.value = p.ref;
+      inpLink.value = p.pdf;
+      const isCustom = erpKey.startsWith("custom:");
+      btnDelSys.hidden = !isCustom;
+      inpSysName.value = isCustom ? erpKey.slice(7) : "";
       if (chkPdf.checked) addPdfLinkToVars();
       updateGenerator();
     }
 
     // O PDF precisa do link também no corpo (variables=...|{link})
     function addPdfLinkToVars() {
-      const link = erpPresets[erpPresetSelect.value].pdf;
+      const link = inpLink.value.trim();
       const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
-      if (!vars.includes(link)) inpVars.value = [...vars, link].join(", ");
+      if (link && !vars.includes(link)) inpVars.value = [...vars, link].join(", ");
     }
 
     function templateType(pix, barcode) {
@@ -713,26 +820,21 @@
     }
 
     function updateGenerator() {
-      const preset = erpPresets[erpPresetSelect.value];
       const pix = chkPix.checked, barcode = chkBarcode.checked, pdf = chkPdf.checked;
       const prodName = inpProdName.value.trim();
       const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
       const type = pdf ? "multi" : templateType(pix, barcode);
-
-      lblPix.textContent = preset.pix;
-      lblBarcode.textContent = preset.barcode;
-      lblPdf.textContent = preset.pdf;
       typeInfo.textContent = type;
 
       const parts = [`variables=${vars.join("|")}`];
-      if (pdf) parts.push("header_type=document", `header_link=${preset.pdf}`, `file_name=${prodName}`);
-      if (barcode) parts.push(`product_bar_code=${preset.barcode}`);
-      if (pix) parts.push(`product_pix_code=${preset.pix}`);
+      if (pdf) parts.push("header_type=document", `header_link=${inpLink.value.trim()}`, `file_name=${prodName}`);
+      if (barcode) parts.push(`product_bar_code=${inpBarcode.value.trim()}`);
+      if (pix) parts.push(`product_pix_code=${inpPix.value.trim()}`);
       parts.push(
         `product_name=${prodName}`,
-        `product_price=${preset.price}`,
+        `product_price=${inpPrice.value.trim()}`,
         `business_name=${inpBizName.value.trim()}`,
-        `ref_template=${preset.ref}`,
+        `ref_template=${inpRef.value.trim()}`,
         `template=${inpTplId.value.trim()}`,
         `type_template=${type}`
       );
@@ -742,11 +844,43 @@
       outputBox.textContent = parts.join("||");
     }
 
+    function flash(el, text) {
+      el.textContent = text;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2000);
+    }
+
+    btnSaveSys.addEventListener("click", () => {
+      const name = inpSysName.value.trim();
+      if (!name) { inpSysName.focus(); return flash(saveFeedback, "Dê um nome ao sistema"); }
+      const custom = loadCustom();
+      custom[name] = {
+        vars: inpVars.value.trim(), pix: inpPix.value.trim(), barcode: inpBarcode.value.trim(),
+        price: inpPrice.value.trim(), ref: inpRef.value.trim(), pdf: inpLink.value.trim()
+      };
+      if (!saveCustom(custom)) return flash(saveFeedback, "Não foi possível salvar neste navegador");
+      renderCustomOptions("custom:" + name);
+      btnDelSys.hidden = false;
+      flash(saveFeedback, "Salvo");
+    });
+
+    btnDelSys.addEventListener("click", () => {
+      const key = erpPresetSelect.value;
+      if (!key.startsWith("custom:")) return;
+      const custom = loadCustom();
+      delete custom[key.slice(7)];
+      saveCustom(custom);
+      delete erpPresets[key];
+      renderCustomOptions("manual");
+      applyErpPreset("manual");
+      flash(saveFeedback, "Excluído");
+    });
+
     chkPdf.addEventListener("change", () => { if (chkPdf.checked) addPdfLinkToVars(); });
 
     erpPresetSelect.addEventListener("change", () => applyErpPreset(erpPresetSelect.value));
 
-    [inpVars, inpProdName, inpBizName, inpTplId, chkBarcode, chkPix, chkPdf].forEach(el => {
+    [inpVars, inpProdName, inpBizName, inpTplId, inpPix, inpBarcode, inpPrice, inpRef, inpLink, chkBarcode, chkPix, chkPdf].forEach(el => {
       el.addEventListener("input", updateGenerator);
       el.addEventListener("change", updateGenerator);
     });
@@ -758,6 +892,7 @@
     });
 
     renderTable();
+    renderCustomOptions();
     applyErpPreset(erpPresetSelect.value);
   </script>
 </body>
