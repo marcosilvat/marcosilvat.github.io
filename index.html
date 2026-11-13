@@ -200,8 +200,107 @@
     .toggle-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
     .toggle-item code { color: var(--muted); font-weight: 500; }
 
-    .save-row { margin: -0.25rem 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .save-row { margin: 0.25rem 0 1.25rem; }
     .save-row input { min-width: 240px; }
+
+    .gen-subtabs {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .gen-subtab {
+      background: var(--code-bg);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.48rem 0.95rem;
+      border-radius: 9px;
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .gen-subtab:hover { color: var(--text); border-color: #b9c6d2; }
+    .gen-subtab.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(49, 94, 214, 0.35); font-weight: 700; }
+
+    .opt-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .opt-field-card {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .opt-field-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .opt-field-title { font-size: 0.84rem; font-weight: 700; color: var(--text); }
+    .opt-field-title code { color: var(--muted); font-weight: 500; }
+    .mode-pills {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .mode-pill {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.28rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-pill:hover { color: var(--text); }
+    .mode-pill.active { background: var(--primary); color: #fff; font-weight: 700; }
+    .opt-field-card input[type="text"] {
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.7rem;
+      font: inherit;
+      font-size: 0.88rem;
+    }
+    .opt-field-card input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .opt-status {
+      font-size: 0.82rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 0.48rem 0.7rem;
+    }
+    .opt-status strong { color: var(--primary); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .opt-status.is-warn { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+    .gen-output-wrap {
+      padding-top: 1.15rem;
+      border-top: 1px solid var(--border);
+    }
 
     .type-info { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.5rem; }
     .type-info strong { color: var(--text); }
@@ -329,7 +428,6 @@
           <a href="index.html" class="nav-tab active" aria-current="page">Código de disparo</a>
           <a href="onde-cadastrar.html" class="nav-tab">Onde cadastrar</a>
           <a href="campanhas.html" class="nav-tab">Cadastrar campanha</a>
-          <a href="modelos.html" class="nav-tab">Modelos</a>
         </nav>
       </div>
       <a href="https://site.chatmix.com.br/" class="ext-link" target="_blank" rel="noopener">site.chatmix.com.br</a>
@@ -430,77 +528,110 @@
         </label>
       </div>
 
-      <p class="type-info">Variáveis do sistema. Mude qualquer campo à mão, se precisar.</p>
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="inp-pix">Código Pix (<code>product_pix_code</code>)</label>
-          <input type="text" id="inp-pix" placeholder="ex.: {codigopix}">
+      <div class="gen-subtabs" id="gen-subtabs" role="tablist" aria-label="Abas do gerador">
+        <button type="button" class="gen-subtab active" data-gen-tab="code" role="tab" aria-selected="true">Gerar código</button>
+        <button type="button" class="gen-subtab" data-gen-tab="vars" role="tab" aria-selected="false">Variáveis do sistema (à mão)</button>
+      </div>
+
+      <div id="gen-panel-code">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="inp-vars">Variáveis do Corpo (separadas por vírgula)</label>
+            <input type="text" id="inp-vars" value="{cliente}, {valor}, {vencimento}">
+          </div>
+          <div class="form-group">
+            <label for="inp-tpl-id">Código da Template (<code>template</code>)</label>
+            <input type="text" id="inp-tpl-id" value="591">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="inp-barcode">Linha digitável (<code>product_bar_code</code>)</label>
-          <input type="text" id="inp-barcode" placeholder="ex.: {linhadigitavel}">
+
+        <div class="opt-cards-grid">
+          <!-- Nome da Fatura (opcional) -->
+          <div class="opt-field-card" id="card-prod-name">
+            <div class="opt-field-header">
+              <span class="opt-field-title">Nome da Fatura (<code>product_name</code>)</span>
+              <div class="mode-pills" role="group" aria-label="Opções do Nome da Fatura">
+                <button type="button" class="mode-pill active" data-field="prod" data-mode="generic">Genérico</button>
+                <button type="button" class="mode-pill" data-field="prod" data-mode="auto">Automático</button>
+                <button type="button" class="mode-pill" data-field="prod" data-mode="off">Desativado</button>
+              </div>
+            </div>
+            <input type="text" id="inp-prod-name" value="Fatura" placeholder="ex.: Fatura ou Mensalidade">
+            <div class="opt-status" id="status-prod-name" hidden></div>
+          </div>
+
+          <!-- Nome da Empresa (opcional) -->
+          <div class="opt-field-card" id="card-biz-name">
+            <div class="opt-field-header">
+              <span class="opt-field-title">Nome da Empresa (<code>business_name</code>)</span>
+              <div class="mode-pills" role="group" aria-label="Opções do Nome da Empresa">
+                <button type="button" class="mode-pill active" data-field="biz" data-mode="generic">Genérico</button>
+                <button type="button" class="mode-pill" data-field="biz" data-mode="auto">Automático</button>
+                <button type="button" class="mode-pill" data-field="biz" data-mode="off">Desativado</button>
+              </div>
+            </div>
+            <input type="text" id="inp-biz-name" value="Minha Empresa" placeholder="ex.: Ultra Core Telecom">
+            <div class="opt-status" id="status-biz-name" hidden></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="inp-price">Valor (<code>product_price</code>)</label>
-          <input type="text" id="inp-price" placeholder="ex.: {valor}">
-        </div>
-        <div class="form-group">
-          <label for="inp-ref">Número da fatura (<code>ref_template</code>)</label>
-          <input type="text" id="inp-ref" placeholder="ex.: {titulo}">
-        </div>
-        <div class="form-group">
-          <label for="inp-link">Link do PDF (<code>header_link</code>)</label>
-          <input type="text" id="inp-link" placeholder="ex.: {link}">
+
+        <div class="toggles-row">
+          <label class="toggle-item">
+            <input type="checkbox" id="chk-pix" checked>
+            Código Pix
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" id="chk-barcode">
+            Código de barras
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" id="chk-pdf">
+            PDF
+          </label>
         </div>
       </div>
 
-      <div class="btn-row save-row">
-        <input type="text" id="inp-sys-name" class="erp-preset-select" placeholder="Nome do sistema (ex.: RadiusNet)">
-        <button type="button" class="btn-copy-sm" id="btn-save-sys">Salvar sistema</button>
-        <button type="button" class="btn-copy-sm" id="btn-del-sys" hidden>Excluir sistema</button>
-        <span class="copy-feedback" id="save-feedback">Salvo</span>
+      <div id="gen-panel-vars" hidden>
+        <p class="type-info">Variáveis padrão do sistema selecionado. Altere qualquer campo à mão se precisar ou salve um sistema personalizado.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="inp-pix">Código Pix (<code>product_pix_code</code>)</label>
+            <input type="text" id="inp-pix" placeholder="ex.: {codigopix}">
+          </div>
+          <div class="form-group">
+            <label for="inp-barcode">Linha digitável (<code>product_bar_code</code>)</label>
+            <input type="text" id="inp-barcode" placeholder="ex.: {linhadigitavel}">
+          </div>
+          <div class="form-group">
+            <label for="inp-price">Valor (<code>product_price</code>)</label>
+            <input type="text" id="inp-price" placeholder="ex.: {valor}">
+          </div>
+          <div class="form-group">
+            <label for="inp-ref">Número da fatura (<code>ref_template</code>)</label>
+            <input type="text" id="inp-ref" placeholder="ex.: {titulo}">
+          </div>
+          <div class="form-group">
+            <label for="inp-link">Link do PDF (<code>header_link</code>)</label>
+            <input type="text" id="inp-link" placeholder="ex.: {link}">
+          </div>
+        </div>
+
+        <div class="btn-row save-row">
+          <input type="text" id="inp-sys-name" class="erp-preset-select" placeholder="Nome do sistema (ex.: RadiusNet)">
+          <button type="button" class="btn-copy-sm" id="btn-save-sys">Salvar sistema</button>
+          <button type="button" class="btn-copy-sm" id="btn-del-sys" hidden>Excluir sistema</button>
+          <span class="copy-feedback" id="save-feedback">Salvo</span>
+        </div>
       </div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="inp-vars">Variáveis do Corpo (separadas por vírgula)</label>
-          <input type="text" id="inp-vars" value="{cliente}, {valor}, {vencimento}">
-        </div>
-        <div class="form-group">
-          <label for="inp-prod-name">Nome da Fatura (<code>product_name</code>)</label>
-          <input type="text" id="inp-prod-name" value="Fatura Nome">
-        </div>
-        <div class="form-group">
-          <label for="inp-biz-name">Nome da Empresa (<code>business_name</code>)</label>
-          <input type="text" id="inp-biz-name" value="Nome">
-        </div>
-        <div class="form-group">
-          <label for="inp-tpl-id">Código da Template (<code>template</code>)</label>
-          <input type="text" id="inp-tpl-id" value="591">
-        </div>
-      </div>
+      <div class="gen-output-wrap">
+        <p class="type-info">type_template: <strong id="type-info"></strong></p>
+        <div class="output-box" id="template-output"></div>
 
-      <div class="toggles-row">
-        <label class="toggle-item">
-          <input type="checkbox" id="chk-pix" checked>
-          Código Pix
-        </label>
-        <label class="toggle-item">
-          <input type="checkbox" id="chk-barcode">
-          Código de barras
-        </label>
-        <label class="toggle-item">
-          <input type="checkbox" id="chk-pdf">
-          PDF
-        </label>
-      </div>
-
-      <p class="type-info">type_template: <strong id="type-info"></strong></p>
-      <div class="output-box" id="template-output"></div>
-
-      <div class="btn-row">
-        <button type="button" class="btn" id="btn-copy-template">Copiar código</button>
-        <span class="copy-feedback" id="copy-feedback">Copiado</span>
+        <div class="btn-row">
+          <button type="button" class="btn" id="btn-copy-template">Copiar código</button>
+          <span class="copy-feedback" id="copy-feedback">Copiado</span>
+        </div>
       </div>
     </section>
 
@@ -557,7 +688,9 @@
         pix: "|PIX_COPIA_E_COLA|",
         price: "|DOCUMENTO_VALOR_TOTAL|",
         ref: "|DOCUMENTO_NUMERO|",
-        pdf: "|LINK_BOLETO|"
+        pdf: "|LINK_BOLETO|",
+        autoProd: "|PLANO|",
+        autoBiz: "|EMPRESA|"
       },
       ixc: {
         vars: "#cliente_nome#, #areceber_data_vencimento#",
@@ -565,7 +698,9 @@
         pix: "#pix_copia_cola#",
         price: "#areceber_valor#",
         ref: "#areceber_id#",
-        pdf: "#link_gateway#"
+        pdf: "#link_gateway#",
+        autoProd: "#contrato_plano#",
+        autoBiz: "#empresa#"
       },
       sgp: {
         vars: "{cliente}, {valor}, {vencimento}",
@@ -573,7 +708,9 @@
         pix: "{codigopix}",
         price: "{valor}",
         ref: "{titulo}",
-        pdf: "{link}"
+        pdf: "{link}",
+        autoProd: null,
+        autoBiz: "{provedor}"
       },
       hubsoft: {
         vars: "[[nome]], [[data_vencimento]]",
@@ -581,7 +718,9 @@
         pix: "[[pix_copia_cola]]",
         price: "[[valor]]",
         ref: "[[numero_fatura]]",
-        pdf: "[[link_fatura]]"
+        pdf: "[[link_fatura]]",
+        autoProd: null,
+        autoBiz: null
       },
       mkauth: {
         vars: "%nomecliente%, %valortitulo%, %vencimento%",
@@ -590,7 +729,9 @@
         price: "%valortitulo%",
         ref: "%numerotitulo%",
         // MK-AUTH não tem variável de link: o endereço do boleto é montado com o domínio do provedor
-        pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%"
+        pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%",
+        autoProd: "%planodeacesso%",
+        autoBiz: "%provedornome%"
       }
     };
 
@@ -766,9 +907,16 @@
 
     // Gerador de Template
     const erpPresetSelect = document.getElementById("erp-preset");
+    const genSubtabs = document.querySelectorAll("#gen-subtabs .gen-subtab");
+    const genPanelCode = document.getElementById("gen-panel-code");
+    const genPanelVars = document.getElementById("gen-panel-vars");
     const inpVars = document.getElementById("inp-vars");
     const inpProdName = document.getElementById("inp-prod-name");
     const inpBizName = document.getElementById("inp-biz-name");
+    const statusProdName = document.getElementById("status-prod-name");
+    const statusBizName = document.getElementById("status-biz-name");
+    const modePills = document.querySelectorAll(".mode-pill");
+    const optModes = { prod: "generic", biz: "generic" };
     const inpTplId = document.getElementById("inp-tpl-id");
     const chkBarcode = document.getElementById("chk-barcode");
     const chkPix = document.getElementById("chk-pix");
@@ -790,7 +938,57 @@
 
     // Sistemas cadastrados ficam no navegador de quem cadastrou (localStorage)
     const STORAGE_KEY = "chatmix-sistemas";
-    erpPresets.manual = { vars: "", pix: "", barcode: "", price: "", ref: "", pdf: "" };
+    erpPresets.manual = { vars: "", pix: "", barcode: "", price: "", ref: "", pdf: "", autoProd: null, autoBiz: null };
+
+    genSubtabs.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-gen-tab");
+        genSubtabs.forEach(b => {
+          const active = b === btn;
+          b.classList.toggle("active", active);
+          b.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        genPanelCode.hidden = target !== "code";
+        genPanelVars.hidden = target !== "vars";
+      });
+    });
+
+    function resolveOptionalField(field) {
+      const mode = optModes[field];
+      const preset = erpPresets[erpPresetSelect.value] || {};
+      if (mode === "off") return { include: false, value: "", status: "Desativado (campo omitido do código)", warn: false };
+      if (mode === "auto") {
+        const autoVar = field === "prod" ? preset.autoProd : preset.autoBiz;
+        if (autoVar) return { include: true, value: autoVar, status: `Puxando automático do sistema: <strong>${autoVar}</strong>`, warn: false };
+        return { include: false, value: "", status: "Variável automática indisponível neste ERP (campo omitido)", warn: true };
+      }
+      const input = field === "prod" ? inpProdName : inpBizName;
+      return { include: true, value: input.value.trim(), status: "", warn: false };
+    }
+
+    function refreshOptionalCards() {
+      [["prod", inpProdName, statusProdName], ["biz", inpBizName, statusBizName]].forEach(([field, input, statusEl]) => {
+        const mode = optModes[field];
+        const res = resolveOptionalField(field);
+        input.hidden = mode !== "generic";
+        statusEl.hidden = mode === "generic";
+        if (mode !== "generic") {
+          statusEl.innerHTML = res.status;
+          statusEl.classList.toggle("is-warn", res.warn);
+        }
+      });
+    }
+
+    modePills.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const field = btn.getAttribute("data-field");
+        const mode = btn.getAttribute("data-mode");
+        optModes[field] = mode;
+        document.querySelectorAll(`.mode-pill[data-field="${field}"]`).forEach(b => b.classList.toggle("active", b === btn));
+        refreshOptionalCards();
+        updateGenerator();
+      });
+    });
 
     function loadCustom() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
@@ -826,6 +1024,7 @@
       btnDelSys.hidden = !isCustom;
       inpSysName.value = isCustom ? erpKey.slice(7) : "";
       if (chkPdf.checked) addPdfLinkToVars();
+      refreshOptionalCards();
       updateGenerator();
     }
 
@@ -845,19 +1044,21 @@
 
     function updateGenerator() {
       const pix = chkPix.checked, barcode = chkBarcode.checked, pdf = chkPdf.checked;
-      const prodName = inpProdName.value.trim();
+      const prodRes = resolveOptionalField("prod");
+      const bizRes = resolveOptionalField("biz");
+      const fileLabel = (prodRes.include && prodRes.value) ? prodRes.value : "Fatura";
       const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
       const type = pdf ? "multi" : templateType(pix, barcode);
       typeInfo.textContent = type;
 
       const parts = [`variables=${vars.join("|")}`];
-      if (pdf) parts.push("header_type=document", `header_link=${inpLink.value.trim()}`, `file_name=${prodName}`);
+      if (pdf) parts.push("header_type=document", `header_link=${inpLink.value.trim()}`, `file_name=${fileLabel}`);
       if (barcode) parts.push(`product_bar_code=${inpBarcode.value.trim()}`);
       if (pix) parts.push(`product_pix_code=${inpPix.value.trim()}`);
+      if (prodRes.include) parts.push(`product_name=${prodRes.value}`);
+      parts.push(`product_price=${inpPrice.value.trim()}`);
+      if (bizRes.include) parts.push(`business_name=${bizRes.value}`);
       parts.push(
-        `product_name=${prodName}`,
-        `product_price=${inpPrice.value.trim()}`,
-        `business_name=${inpBizName.value.trim()}`,
         `ref_template=${inpRef.value.trim()}`,
         `template=${inpTplId.value.trim()}`,
         `type_template=${type}`
