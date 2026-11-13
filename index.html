@@ -573,6 +573,18 @@
             <input type="text" id="inp-biz-name" value="Minha Empresa" placeholder="ex.: Ultra Core Telecom">
             <div class="opt-status" id="status-biz-name" hidden></div>
           </div>
+
+          <!-- Data de Vencimento -->
+          <div class="opt-field-card" id="card-due-date">
+            <div class="opt-field-header">
+              <span class="opt-field-title">Data de Vencimento (<code>variables</code>)</span>
+              <div class="mode-pills" role="group" aria-label="Opções de Data de Vencimento">
+                <button type="button" class="mode-pill due-pill active" data-due="updated">Atualizada</button>
+                <button type="button" class="mode-pill due-pill" data-due="original">Original</button>
+              </div>
+            </div>
+            <div class="opt-status" id="status-due-date"></div>
+          </div>
         </div>
 
         <div class="toggles-row">
@@ -690,7 +702,9 @@
         ref: "|DOCUMENTO_NUMERO|",
         pdf: "|LINK_BOLETO|",
         autoProd: "|PLANO|",
-        autoBiz: "|EMPRESA|"
+        autoBiz: "|EMPRESA|",
+        dueUpdated: "|DOCUMENTO_VENCIMENTO|",
+        dueOriginal: "|DOCUMENTO_DATA_VENCIMENTO|"
       },
       ixc: {
         vars: "#cliente_nome#, #areceber_data_vencimento#",
@@ -700,7 +714,9 @@
         ref: "#areceber_id#",
         pdf: "#link_gateway#",
         autoProd: "#contrato_plano#",
-        autoBiz: "#empresa#"
+        autoBiz: "#empresa#",
+        dueUpdated: "#areceber_data_vencimento#",
+        dueOriginal: null
       },
       sgp: {
         vars: "{cliente}, {valor}, {vencimento}",
@@ -710,7 +726,9 @@
         ref: "{titulo}",
         pdf: "{link}",
         autoProd: null,
-        autoBiz: "{provedor}"
+        autoBiz: "{provedor}",
+        dueUpdated: "{vencimento}",
+        dueOriginal: "{vencimento_original}"
       },
       hubsoft: {
         vars: "[[nome]], [[data_vencimento]]",
@@ -720,7 +738,9 @@
         ref: "[[numero_fatura]]",
         pdf: "[[link_fatura]]",
         autoProd: null,
-        autoBiz: null
+        autoBiz: null,
+        dueUpdated: "[[data_vencimento]]",
+        dueOriginal: null
       },
       mkauth: {
         vars: "%nomecliente%, %valortitulo%, %vencimento%",
@@ -731,7 +751,9 @@
         // MK-AUTH não tem variável de link: o endereço do boleto é montado com o domínio do provedor
         pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%",
         autoProd: "%planodeacesso%",
-        autoBiz: "%provedornome%"
+        autoBiz: "%provedornome%",
+        dueUpdated: "%vencimento%",
+        dueOriginal: null
       }
     };
 
@@ -915,8 +937,11 @@
     const inpBizName = document.getElementById("inp-biz-name");
     const statusProdName = document.getElementById("status-prod-name");
     const statusBizName = document.getElementById("status-biz-name");
-    const modePills = document.querySelectorAll(".mode-pill");
+    const statusDueDate = document.getElementById("status-due-date");
+    const modePills = document.querySelectorAll(".mode-pill[data-field]");
+    const duePills = document.querySelectorAll(".due-pill");
     const optModes = { prod: "generic", biz: "generic" };
+    let dueMode = "updated";
     const inpTplId = document.getElementById("inp-tpl-id");
     const chkBarcode = document.getElementById("chk-barcode");
     const chkPix = document.getElementById("chk-pix");
@@ -966,6 +991,46 @@
       return { include: true, value: input.value.trim(), status: "", warn: false };
     }
 
+    function applyDueDateToVars() {
+      const p = erpPresets[erpPresetSelect.value] || {};
+      if (!p.dueUpdated) return;
+      const targetVar = (dueMode === "original" && p.dueOriginal) ? p.dueOriginal : p.dueUpdated;
+      const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
+      const updatedVars = vars.map(v => (v === p.dueUpdated || (p.dueOriginal && v === p.dueOriginal)) ? targetVar : v);
+      inpVars.value = updatedVars.join(", ");
+    }
+
+    function refreshDueCard() {
+      const p = erpPresets[erpPresetSelect.value] || {};
+      if (!p.dueUpdated) {
+        statusDueDate.innerHTML = "Sistema manual/personalizado: informe a variável de vencimento em <strong>Variáveis do Corpo</strong>";
+        statusDueDate.classList.add("is-warn");
+        return;
+      }
+      if (dueMode === "original") {
+        if (p.dueOriginal) {
+          statusDueDate.innerHTML = `Vencimento original: <strong>${p.dueOriginal}</strong>`;
+          statusDueDate.classList.remove("is-warn");
+        } else {
+          statusDueDate.innerHTML = `Este ERP usa apenas vencimento padrão: <strong>${p.dueUpdated}</strong>`;
+          statusDueDate.classList.add("is-warn");
+        }
+      } else {
+        statusDueDate.innerHTML = `Vencimento atualizado: <strong>${p.dueUpdated}</strong>`;
+        statusDueDate.classList.remove("is-warn");
+      }
+    }
+
+    duePills.forEach(btn => {
+      btn.addEventListener("click", () => {
+        dueMode = btn.getAttribute("data-due");
+        duePills.forEach(b => b.classList.toggle("active", b === btn));
+        applyDueDateToVars();
+        refreshDueCard();
+        updateGenerator();
+      });
+    });
+
     function refreshOptionalCards() {
       [["prod", inpProdName, statusProdName], ["biz", inpBizName, statusBizName]].forEach(([field, input, statusEl]) => {
         const mode = optModes[field];
@@ -977,6 +1042,7 @@
           statusEl.classList.toggle("is-warn", res.warn);
         }
       });
+      refreshDueCard();
     }
 
     modePills.forEach(btn => {
@@ -1024,6 +1090,7 @@
       btnDelSys.hidden = !isCustom;
       inpSysName.value = isCustom ? erpKey.slice(7) : "";
       if (chkPdf.checked) addPdfLinkToVars();
+      applyDueDateToVars();
       refreshOptionalCards();
       updateGenerator();
     }
