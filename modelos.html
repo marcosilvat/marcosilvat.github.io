@@ -156,6 +156,10 @@
     .save-row { display: flex; align-items: center; gap: 0.75rem; grid-column: 1 / -1; }
     .feedback { font-size: 0.85rem; color: #1f8a4c; font-weight: 600; }
     .empty { color: var(--muted); padding: 1rem 0 2rem; }
+    .chip-team { color: var(--primary); border-color: rgba(49, 94, 214, 0.35); background: var(--primary-soft); }
+    .btn-pub { border-color: var(--primary); color: var(--primary); }
+    a.btn-sm { text-decoration: none; display: inline-flex; align-items: center; }
+    .card-actions { flex-wrap: wrap; }
 
     @media (max-width: 760px) { .add-grid { grid-template-columns: 1fr; } }
   </style>
@@ -225,7 +229,7 @@
             <button type="button" class="btn" id="m-save">Salvar modelo</button>
             <span class="feedback" id="m-feedback" aria-live="polite"></span>
           </div>
-          <p class="legend full" style="grid-column: 1 / -1">Fica salvo neste navegador. Para aparecer para todos, o modelo precisa entrar no código do site.</p>
+          <p class="legend full" style="grid-column: 1 / -1">O modelo fica salvo primeiro só neste navegador, em “Meus modelos”. Para aparecer para todos, clique em <strong>Publicar no site</strong> no cartão dele: o GitHub abre com o modelo pronto, é só clicar em <strong>Commit changes</strong>. Em 1 ou 2 minutos ele aparece para o time. Precisa ter acesso de edição ao repositório.</p>
         </div>
         <div>
           <p class="legend" style="margin-bottom:0.4rem">Prévia</p>
@@ -248,6 +252,7 @@
       <input type="search" id="search" class="search-input" placeholder="Pesquisar modelo" aria-label="Pesquisar modelo">
     </div>
 
+    <p class="legend" id="shared-status" role="status"></p>
     <div id="list"></div>
   </div>
 
@@ -620,10 +625,63 @@
       return `<p class="legend">${names.map((n, i) => `<code>{{${i + 1}}}</code> ${esc(n)}`).join(" · ")}</p>`;
     }
 
+    // Modelos compartilhados: um arquivo .json por modelo na pasta abaixo do repositório do site
+    const REPO = "marcosilvat/marcosilvat.github.io";
+    const BRANCH = "main";
+    const SHARED_DIR = "modelos-compartilhados";
+    const CACHE_KEY = "chatmix-modelos-time";
+    let sharedModels = [];
+
+    // Arquivo vem de fora da página: só aceita os campos conhecidos
+    function cleanModel(raw) {
+      if (!raw || typeof raw !== "object") return null;
+      const str = v => (typeof v === "string" ? v.slice(0, 1500) : "");
+      const m = {
+        title: str(raw.title), cat: GROUPS[raw.cat] && raw.cat !== "meus" ? raw.cat : "aviso",
+        text: str(raw.text), vars: str(raw.vars), button: str(raw.button),
+        ref: raw.ref === true, pdf: raw.pdf === true, pix: raw.pix === true, barcode: raw.barcode === true
+      };
+      return m.title && m.text ? m : null;
+    }
+
+    async function loadShared() {
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+        if (cached && Date.now() - cached.at < 5 * 60 * 1000) { sharedModels = cached.list; return render(); }
+      } catch {}
+      try {
+        // shortcut: API pública do GitHub tem limite de 60 consultas/hora por IP; o cache de 5 min evita estourar
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${SHARED_DIR}?ref=${BRANCH}`);
+        if (res.status === 404) { sharedModels = []; return render(); }
+        if (!res.ok) throw new Error(res.status);
+        const files = (await res.json()).filter(f => f.type === "file" && f.name.endsWith(".json"));
+        const list = await Promise.all(files.map(async f => {
+          try { const m = cleanModel(await (await fetch(f.download_url)).json()); return m && { ...m, sharedPath: f.path }; }
+          catch { return null; }
+        }));
+        sharedModels = list.filter(Boolean);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), list: sharedModels })); } catch {}
+      } catch {
+        document.getElementById("shared-status").textContent = "Não foi possível carregar os modelos do time agora. Tente recarregar a página em alguns minutos.";
+      }
+      render();
+    }
+
+    function slug(t) {
+      return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) || "modelo";
+    }
+
+    function publishUrl(m) {
+      const data = cleanModel(m);
+      const file = `${SHARED_DIR}/${slug(m.title)}-${Date.now().toString(36)}.json`;
+      const params = new URLSearchParams({ filename: file, value: JSON.stringify(data, null, 2) + "\n", message: `Modelo: ${data.title}` });
+      return `https://github.com/${REPO}/new/${BRANCH}?${params}`;
+    }
+
     function render() {
       const q = searchEl.value.trim().toLowerCase();
       const custom = loadCustom().map((m, i) => ({ ...m, customIndex: i }));
-      const all = [...builtinModels, ...custom];
+      const all = [...builtinModels, ...sharedModels, ...custom];
       const groups = {};
       all.forEach(m => {
         if (currentCat !== "all" && m.cat !== currentCat) return;
@@ -640,12 +698,14 @@
         <div class="grid">
           ${groups[g].map(m => `
             <article class="card">
-              <div class="card-head"><h3>${esc(m.title)}</h3><div class="chips">${chips(m)}</div></div>
+              <div class="card-head"><h3>${esc(m.title)}</h3><div class="chips">${m.sharedPath ? `<span class="chip chip-team">Do time</span>` : ""}${chips(m)}</div></div>
               ${preview(m)}
               ${legend(m)}
               <div class="card-actions">
                 <button type="button" class="btn-sm" data-copy="${esc(m.text)}">Copiar texto</button>
-                ${m.customIndex === undefined ? "" : `<button type="button" class="btn-sm" data-del="${m.customIndex}">Excluir</button>`}
+                ${m.customIndex === undefined ? "" : `<button type="button" class="btn-sm btn-pub" data-pub="${m.customIndex}">Publicar no site</button>
+                <button type="button" class="btn-sm" data-del="${m.customIndex}">Excluir</button>`}
+                ${m.sharedPath ? `<a class="btn-sm" href="https://github.com/${REPO}/delete/${BRANCH}/${encodeURI(m.sharedPath)}" target="_blank" rel="noopener">Remover do site</a>` : ""}
               </div>
             </article>`).join("")}
         </div>`).join("");
@@ -669,6 +729,12 @@
         copyToClipboard(copy.dataset.copy);
         copy.textContent = "Copiado";
         setTimeout(() => { copy.textContent = "Copiar texto"; }, 1400);
+        return;
+      }
+      const pub = e.target.closest("[data-pub]");
+      if (pub) {
+        const m = loadCustom()[Number(pub.dataset.pub)];
+        if (m) window.open(publishUrl(m), "_blank", "noopener");
         return;
       }
       const del = e.target.closest("[data-del]");
@@ -719,13 +785,14 @@
       if (!saveCustom(list)) { feedback.textContent = "Não foi possível salvar neste navegador"; return; }
       Object.values(form).forEach(el => { if (el.type === "checkbox") el.checked = false; else if (el.tagName !== "SELECT") el.value = ""; });
       updatePreview();
-      feedback.textContent = "Salvo. Está em “Meus modelos”.";
+      feedback.textContent = "Salvo em “Meus modelos”. Use “Publicar no site” para mostrar ao time.";
       setTimeout(() => { feedback.textContent = ""; }, 2500);
       render();
     });
 
     updatePreview();
     render();
+    loadShared();
   </script>
 </body>
 </html>

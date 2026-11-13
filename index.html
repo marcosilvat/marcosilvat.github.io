@@ -226,77 +226,8 @@
     .gen-subtab:hover { color: var(--text); border-color: #b9c6d2; }
     .gen-subtab.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(49, 94, 214, 0.35); font-weight: 700; }
 
-    .opt-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-    .opt-field-card {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 0.9rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-    .opt-field-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .opt-field-title { font-size: 0.84rem; font-weight: 700; color: var(--text); }
-    .opt-field-title code { color: var(--muted); font-weight: 500; }
-    .mode-pills {
-      display: inline-flex;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 2px;
-      gap: 2px;
-    }
-    .mode-pill {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font: inherit;
-      font-size: 0.76rem;
-      font-weight: 600;
-      padding: 0.28rem 0.6rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .mode-pill:hover { color: var(--text); }
-    .mode-pill.active { background: var(--primary); color: #fff; font-weight: 700; }
-    .opt-field-card input[type="text"] {
-      width: 100%;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.5rem 0.7rem;
-      font: inherit;
-      font-size: 0.88rem;
-    }
-    .opt-field-card input[type="text"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-soft);
-    }
-    .opt-status {
-      font-size: 0.82rem;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      padding: 0.48rem 0.7rem;
-    }
-    .opt-status strong { color: var(--primary); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .opt-status.is-warn { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+    .media-type { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.86rem; font-weight: 600; color: var(--muted); }
+    .toggle-item.is-disabled { opacity: 0.5; cursor: not-allowed; }
     .gen-output-wrap {
       padding-top: 1.15rem;
       border-top: 1px solid var(--border);
@@ -541,49 +472,15 @@
           </div>
           <div class="form-group">
             <label for="inp-tpl-id">Código da Template (<code>template</code>)</label>
-            <input type="text" id="inp-tpl-id" value="591">
+            <input type="text" id="inp-tpl-id" placeholder="ex.: 591" inputmode="numeric">
           </div>
-        </div>
-
-        <div class="opt-cards-grid">
-          <!-- Nome da Fatura (opcional) -->
-          <div class="opt-field-card" id="card-prod-name">
-            <div class="opt-field-header">
-              <span class="opt-field-title">Nome da Fatura (<code>product_name</code>)</span>
-              <div class="mode-pills" role="group" aria-label="Opções do Nome da Fatura">
-                <button type="button" class="mode-pill active" data-field="prod" data-mode="generic">Genérico</button>
-                <button type="button" class="mode-pill" data-field="prod" data-mode="auto">Automático</button>
-                <button type="button" class="mode-pill" data-field="prod" data-mode="off">Desativado</button>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="inp-prod-name">Nome da Fatura (<code>product_name</code>)</label>
             <input type="text" id="inp-prod-name" value="Fatura" placeholder="ex.: Fatura ou Mensalidade">
-            <div class="opt-status" id="status-prod-name" hidden></div>
           </div>
-
-          <!-- Nome da Empresa (opcional) -->
-          <div class="opt-field-card" id="card-biz-name">
-            <div class="opt-field-header">
-              <span class="opt-field-title">Nome da Empresa (<code>business_name</code>)</span>
-              <div class="mode-pills" role="group" aria-label="Opções do Nome da Empresa">
-                <button type="button" class="mode-pill active" data-field="biz" data-mode="generic">Genérico</button>
-                <button type="button" class="mode-pill" data-field="biz" data-mode="auto">Automático</button>
-                <button type="button" class="mode-pill" data-field="biz" data-mode="off">Desativado</button>
-              </div>
-            </div>
+          <div class="form-group">
+            <label for="inp-biz-name">Nome da Empresa (<code>business_name</code>)</label>
             <input type="text" id="inp-biz-name" value="Minha Empresa" placeholder="ex.: Ultra Core Telecom">
-            <div class="opt-status" id="status-biz-name" hidden></div>
-          </div>
-
-          <!-- Data de Vencimento -->
-          <div class="opt-field-card" id="card-due-date">
-            <div class="opt-field-header">
-              <span class="opt-field-title">Data de Vencimento (<code>variables</code>)</span>
-              <div class="mode-pills" role="group" aria-label="Opções de Data de Vencimento">
-                <button type="button" class="mode-pill due-pill active" data-due="updated">Atualizada</button>
-                <button type="button" class="mode-pill due-pill" data-due="original">Original</button>
-              </div>
-            </div>
-            <div class="opt-status" id="status-due-date"></div>
           </div>
         </div>
 
@@ -598,7 +495,20 @@
           </label>
           <label class="toggle-item">
             <input type="checkbox" id="chk-pdf">
-            PDF
+            Mídia / PDF
+          </label>
+          <label class="media-type" id="media-type-wrap" hidden>
+            Tipo:
+            <select id="sel-header-type" class="erp-preset-select">
+              <option value="document">Documento (PDF)</option>
+              <option value="image">Imagem</option>
+              <option value="video">Vídeo</option>
+              <option value="audio">Áudio</option>
+            </select>
+          </label>
+          <label class="toggle-item" id="radius-wrap" title="Sem mídia, o RadiusNet usa a template com final _nofile">
+            <input type="checkbox" id="chk-radius">
+            Enviado via RadiusNet
           </label>
         </div>
       </div>
@@ -623,7 +533,7 @@
             <input type="text" id="inp-ref" placeholder="ex.: {titulo}">
           </div>
           <div class="form-group">
-            <label for="inp-link">Link do PDF (<code>header_link</code>)</label>
+            <label for="inp-link">Link da mídia / PDF (<code>header_link</code>)</label>
             <input type="text" id="inp-link" placeholder="ex.: {link}">
           </div>
         </div>
@@ -700,11 +610,7 @@
         pix: "|PIX_COPIA_E_COLA|",
         price: "|DOCUMENTO_VALOR_TOTAL|",
         ref: "|DOCUMENTO_NUMERO|",
-        pdf: "|LINK_BOLETO|",
-        autoProd: "|PLANO|",
-        autoBiz: "|EMPRESA|",
-        dueUpdated: "|DOCUMENTO_VENCIMENTO|",
-        dueOriginal: "|DOCUMENTO_DATA_VENCIMENTO|"
+        pdf: "|LINK_BOLETO|"
       },
       ixc: {
         vars: "#cliente_nome#, #areceber_data_vencimento#",
@@ -712,11 +618,7 @@
         pix: "#pix_copia_cola#",
         price: "#areceber_valor#",
         ref: "#areceber_id#",
-        pdf: "#link_gateway#",
-        autoProd: "#contrato_plano#",
-        autoBiz: "#empresa#",
-        dueUpdated: "#areceber_data_vencimento#",
-        dueOriginal: null
+        pdf: "#link_gateway#"
       },
       sgp: {
         vars: "{cliente}, {valor}, {vencimento}",
@@ -724,11 +626,7 @@
         pix: "{codigopix}",
         price: "{valor}",
         ref: "{titulo}",
-        pdf: "{link}",
-        autoProd: null,
-        autoBiz: "{provedor}",
-        dueUpdated: "{vencimento}",
-        dueOriginal: "{vencimento_original}"
+        pdf: "{link}"
       },
       hubsoft: {
         vars: "[[nome]], [[data_vencimento]]",
@@ -736,11 +634,7 @@
         pix: "[[pix_copia_cola]]",
         price: "[[valor]]",
         ref: "[[numero_fatura]]",
-        pdf: "[[link_fatura]]",
-        autoProd: null,
-        autoBiz: null,
-        dueUpdated: "[[data_vencimento]]",
-        dueOriginal: null
+        pdf: "[[link_fatura]]"
       },
       mkauth: {
         vars: "%nomecliente%, %valortitulo%, %vencimento%",
@@ -749,11 +643,7 @@
         price: "%valortitulo%",
         ref: "%numerotitulo%",
         // MK-AUTH não tem variável de link: o endereço do boleto é montado com o domínio do provedor
-        pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%",
-        autoProd: "%planodeacesso%",
-        autoBiz: "%provedornome%",
-        dueUpdated: "%vencimento%",
-        dueOriginal: null
+        pdf: "https://SEU-PROVEDOR/boleto/boleto.hhvm?titulo=%numerotitulo%&contrato=%logincliente%"
       }
     };
 
@@ -935,17 +825,14 @@
     const inpVars = document.getElementById("inp-vars");
     const inpProdName = document.getElementById("inp-prod-name");
     const inpBizName = document.getElementById("inp-biz-name");
-    const statusProdName = document.getElementById("status-prod-name");
-    const statusBizName = document.getElementById("status-biz-name");
-    const statusDueDate = document.getElementById("status-due-date");
-    const modePills = document.querySelectorAll(".mode-pill[data-field]");
-    const duePills = document.querySelectorAll(".due-pill");
-    const optModes = { prod: "generic", biz: "generic" };
-    let dueMode = "updated";
     const inpTplId = document.getElementById("inp-tpl-id");
     const chkBarcode = document.getElementById("chk-barcode");
     const chkPix = document.getElementById("chk-pix");
     const chkPdf = document.getElementById("chk-pdf");
+    const chkRadius = document.getElementById("chk-radius");
+    const selHeaderType = document.getElementById("sel-header-type");
+    const mediaTypeWrap = document.getElementById("media-type-wrap");
+    const radiusWrap = document.getElementById("radius-wrap");
     const inpPix = document.getElementById("inp-pix");
     const inpBarcode = document.getElementById("inp-barcode");
     const inpPrice = document.getElementById("inp-price");
@@ -963,7 +850,7 @@
 
     // Sistemas cadastrados ficam no navegador de quem cadastrou (localStorage)
     const STORAGE_KEY = "chatmix-sistemas";
-    erpPresets.manual = { vars: "", pix: "", barcode: "", price: "", ref: "", pdf: "", autoProd: null, autoBiz: null };
+    erpPresets.manual = { vars: "", pix: "", barcode: "", price: "", ref: "", pdf: "" };
 
     genSubtabs.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -975,84 +862,6 @@
         });
         genPanelCode.hidden = target !== "code";
         genPanelVars.hidden = target !== "vars";
-      });
-    });
-
-    function resolveOptionalField(field) {
-      const mode = optModes[field];
-      const preset = erpPresets[erpPresetSelect.value] || {};
-      if (mode === "off") return { include: false, value: "", status: "Desativado (campo omitido do código)", warn: false };
-      if (mode === "auto") {
-        const autoVar = field === "prod" ? preset.autoProd : preset.autoBiz;
-        if (autoVar) return { include: true, value: autoVar, status: `Puxando automático do sistema: <strong>${autoVar}</strong>`, warn: false };
-        return { include: false, value: "", status: "Variável automática indisponível neste ERP (campo omitido)", warn: true };
-      }
-      const input = field === "prod" ? inpProdName : inpBizName;
-      return { include: true, value: input.value.trim(), status: "", warn: false };
-    }
-
-    function applyDueDateToVars() {
-      const p = erpPresets[erpPresetSelect.value] || {};
-      if (!p.dueUpdated) return;
-      const targetVar = (dueMode === "original" && p.dueOriginal) ? p.dueOriginal : p.dueUpdated;
-      const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
-      const updatedVars = vars.map(v => (v === p.dueUpdated || (p.dueOriginal && v === p.dueOriginal)) ? targetVar : v);
-      inpVars.value = updatedVars.join(", ");
-    }
-
-    function refreshDueCard() {
-      const p = erpPresets[erpPresetSelect.value] || {};
-      if (!p.dueUpdated) {
-        statusDueDate.innerHTML = "Sistema manual/personalizado: informe a variável de vencimento em <strong>Variáveis do Corpo</strong>";
-        statusDueDate.classList.add("is-warn");
-        return;
-      }
-      if (dueMode === "original") {
-        if (p.dueOriginal) {
-          statusDueDate.innerHTML = `Vencimento original: <strong>${p.dueOriginal}</strong>`;
-          statusDueDate.classList.remove("is-warn");
-        } else {
-          statusDueDate.innerHTML = `Este ERP usa apenas vencimento padrão: <strong>${p.dueUpdated}</strong>`;
-          statusDueDate.classList.add("is-warn");
-        }
-      } else {
-        statusDueDate.innerHTML = `Vencimento atualizado: <strong>${p.dueUpdated}</strong>`;
-        statusDueDate.classList.remove("is-warn");
-      }
-    }
-
-    duePills.forEach(btn => {
-      btn.addEventListener("click", () => {
-        dueMode = btn.getAttribute("data-due");
-        duePills.forEach(b => b.classList.toggle("active", b === btn));
-        applyDueDateToVars();
-        refreshDueCard();
-        updateGenerator();
-      });
-    });
-
-    function refreshOptionalCards() {
-      [["prod", inpProdName, statusProdName], ["biz", inpBizName, statusBizName]].forEach(([field, input, statusEl]) => {
-        const mode = optModes[field];
-        const res = resolveOptionalField(field);
-        input.hidden = mode !== "generic";
-        statusEl.hidden = mode === "generic";
-        if (mode !== "generic") {
-          statusEl.innerHTML = res.status;
-          statusEl.classList.toggle("is-warn", res.warn);
-        }
-      });
-      refreshDueCard();
-    }
-
-    modePills.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const field = btn.getAttribute("data-field");
-        const mode = btn.getAttribute("data-mode");
-        optModes[field] = mode;
-        document.querySelectorAll(`.mode-pill[data-field="${field}"]`).forEach(b => b.classList.toggle("active", b === btn));
-        refreshOptionalCards();
-        updateGenerator();
       });
     });
 
@@ -1090,8 +899,6 @@
       btnDelSys.hidden = !isCustom;
       inpSysName.value = isCustom ? erpKey.slice(7) : "";
       if (chkPdf.checked) addPdfLinkToVars();
-      applyDueDateToVars();
-      refreshOptionalCards();
       updateGenerator();
     }
 
@@ -1104,33 +911,40 @@
 
     function templateType(pix, barcode) {
       if (pix && barcode) return "multi";
-      if (pix) return "pix";
-      if (barcode) return "barcode";
-      return "multi"; // shortcut: sem Pix e sem boleto não há exemplo; ajustar se a API exigir outro valor
+      return pix ? "pix" : "barcode";
     }
 
+    // Mesmas regras do gerador do painel BulkV2 (bulkv2.chatmix.com.br/painel/gerador-variaveis)
     function updateGenerator() {
-      const pix = chkPix.checked, barcode = chkBarcode.checked, pdf = chkPdf.checked;
-      const prodRes = resolveOptionalField("prod");
-      const bizRes = resolveOptionalField("biz");
-      const fileLabel = (prodRes.include && prodRes.value) ? prodRes.value : "Fatura";
+      const pix = chkPix.checked, barcode = chkBarcode.checked, media = chkPdf.checked;
+      const details = pix || barcode; // "detalhes do pedido": só existe com Pix e/ou boleto
+      const radius = chkRadius.checked && !media; // RadiusNet só vale para template sem mídia
+      const prodName = inpProdName.value.trim();
+      const bizName = inpBizName.value.trim();
       const vars = inpVars.value.split(",").map(s => s.trim()).filter(Boolean);
-      const type = pdf ? "multi" : templateType(pix, barcode);
-      typeInfo.textContent = type;
+      const type = details ? templateType(pix, barcode) : null;
+
+      mediaTypeWrap.hidden = !media;
+      chkRadius.disabled = media;
+      radiusWrap.classList.toggle("is-disabled", media);
+      typeInfo.textContent = type || "sem detalhes do pedido";
 
       const parts = [`variables=${vars.join("|")}`];
-      if (pdf) parts.push("header_type=document", `header_link=${inpLink.value.trim()}`, `file_name=${fileLabel}`);
-      if (barcode) parts.push(`product_bar_code=${inpBarcode.value.trim()}`);
-      if (pix) parts.push(`product_pix_code=${inpPix.value.trim()}`);
-      if (prodRes.include) parts.push(`product_name=${prodRes.value}`);
-      parts.push(`product_price=${inpPrice.value.trim()}`);
-      if (bizRes.include) parts.push(`business_name=${bizRes.value}`);
-      parts.push(
-        `ref_template=${inpRef.value.trim()}`,
-        `template=${inpTplId.value.trim()}`,
-        `type_template=${type}`
-      );
-      if (pdf) parts.push("pdf_in_hsm=true");
+      if (media) {
+        parts.push(`header_type=${selHeaderType.value}`, `header_link=${inpLink.value.trim()}`);
+        if (details) parts.push(`file_name=${prodName || "Fatura"}`);
+      }
+      if (details) {
+        if (barcode) parts.push(`product_bar_code=${inpBarcode.value.trim()}`);
+        if (pix) parts.push(`product_pix_code=${inpPix.value.trim()}`);
+        if (prodName) parts.push(`product_name=${prodName}`);
+        parts.push(`product_price=${inpPrice.value.trim()}`);
+        if (bizName) parts.push(`business_name=${bizName}`);
+        parts.push(`ref_template=${inpRef.value.trim()}`);
+      }
+      parts.push(`template=${inpTplId.value.trim()}${radius ? "_nofile" : ""}`);
+      if (details) parts.push(`type_template=${type}`);
+      if (media && details) parts.push("pdf_in_hsm=true");
 
       // No RBX, valor terminado em "|" + "||" vira "|||" automaticamente
       outputBox.textContent = parts.join("||");
@@ -1168,17 +982,26 @@
       flash(saveFeedback, "Excluído");
     });
 
-    chkPdf.addEventListener("change", () => { if (chkPdf.checked) addPdfLinkToVars(); });
+    chkPdf.addEventListener("change", () => {
+      if (chkPdf.checked) return addPdfLinkToVars();
+      const link = inpLink.value.trim();
+      inpVars.value = inpVars.value.split(",").map(v => v.trim()).filter(v => v && v !== link).join(", ");
+    });
 
     erpPresetSelect.addEventListener("change", () => applyErpPreset(erpPresetSelect.value));
 
-    [inpVars, inpProdName, inpBizName, inpTplId, inpPix, inpBarcode, inpPrice, inpRef, inpLink, chkBarcode, chkPix, chkPdf].forEach(el => {
+    [inpVars, inpProdName, inpBizName, inpTplId, inpPix, inpBarcode, inpPrice, inpRef, inpLink, chkBarcode, chkPix, chkPdf, chkRadius, selHeaderType].forEach(el => {
       el.addEventListener("input", updateGenerator);
       el.addEventListener("change", updateGenerator);
     });
 
     btnCopyTemplate.addEventListener("click", () => {
+      if (!inpTplId.value.trim()) {
+        inpTplId.focus();
+        return flash(copyFeedback, "Preencha o Código da Template");
+      }
       copyToClipboard(outputBox.textContent);
+      copyFeedback.textContent = "Copiado";
       copyFeedback.classList.add("show");
       setTimeout(() => copyFeedback.classList.remove("show"), 2000);
     });
