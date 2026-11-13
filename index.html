@@ -41,9 +41,23 @@
       border-bottom: 1px solid var(--border);
       margin-bottom: 2.5rem;
     }
-    .topbar .container { display: flex; align-items: center; justify-content: space-between; height: 68px; }
-    .topbar img { height: 30px; width: auto; }
-    .topbar a { font-size: 0.85rem; font-weight: 600; color: var(--primary); text-decoration: none; }
+    .topbar .container { display: flex; align-items: center; justify-content: space-between; min-height: 68px; gap: 1rem; flex-wrap: wrap; padding: 0.6rem 0; }
+    .topbar-left { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .topbar img { height: 30px; width: auto; display: block; }
+    .topbar a.ext-link { font-size: 0.85rem; font-weight: 600; color: var(--primary); text-decoration: none; }
+    .top-nav { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+    .nav-tab {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+    .nav-tab:hover { color: var(--text); background: var(--surface-hover); border-color: var(--border); }
+    .nav-tab.active { background: var(--primary-soft); color: var(--primary); border-color: rgba(49, 94, 214, 0.25); font-weight: 700; }
 
     .container { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
 
@@ -186,12 +200,6 @@
     .toggle-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
     .toggle-item code { color: var(--muted); font-weight: 500; }
 
-    .add-var { padding: 1rem 1.5rem; margin-bottom: 1.25rem; }
-    .add-var summary { cursor: pointer; font-weight: 750; letter-spacing: -0.02em; }
-    .add-var[open] summary { margin-bottom: 1rem; }
-    .form-group select { width: 100%; }
-    .erp-custom { background: #eef2f5; color: var(--dark); }
-
     .save-row { margin: -0.25rem 0 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
     .save-row input { min-width: 240px; }
 
@@ -313,8 +321,16 @@
 <body>
   <div class="topbar">
     <div class="container">
-      <img src="https://site.chatmix.com.br/assets/chatmix-logo.png" alt="Chatmix">
-      <a href="https://site.chatmix.com.br/" target="_blank" rel="noopener">site.chatmix.com.br</a>
+      <div class="topbar-left">
+        <a href="index.html" aria-label="Chatmix — Página inicial">
+          <img src="https://site.chatmix.com.br/assets/chatmix-logo.png" alt="Chatmix">
+        </a>
+        <nav class="top-nav" aria-label="Navegação principal">
+          <a href="index.html" class="nav-tab active" aria-current="page">Código de disparo</a>
+          <a href="onde-cadastrar.html" class="nav-tab">Onde cadastrar</a>
+        </nav>
+      </div>
+      <a href="https://site.chatmix.com.br/" class="ext-link" target="_blank" rel="noopener">site.chatmix.com.br</a>
     </div>
   </div>
 
@@ -488,42 +504,6 @@
 
     <!-- Catálogo de Variáveis -->
     <section aria-label="Lista de Variáveis dos ERPs">
-      <details class="generator-section add-var">
-        <summary>Cadastrar variável</summary>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="nv-erp">Sistema</label>
-            <input type="text" id="nv-erp" list="erp-list" placeholder="ex.: RadiusNet">
-            <datalist id="erp-list"></datalist>
-          </div>
-          <div class="form-group">
-            <label for="nv-code">Variável</label>
-            <input type="text" id="nv-code" placeholder="ex.: {pix_copia_cola}">
-          </div>
-          <div class="form-group">
-            <label for="nv-desc">Descrição</label>
-            <input type="text" id="nv-desc" placeholder="ex.: Código Pix copia e cola">
-          </div>
-          <div class="form-group">
-            <label for="nv-cat">Categoria</label>
-            <select id="nv-cat" class="erp-preset-select">
-              <option value="financeiro">Financeiro / Fatura</option>
-              <option value="cliente">Cliente / Cadastro</option>
-              <option value="contrato">Contrato / Rede / Msg</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="nv-example">Exemplo (opcional)</label>
-            <input type="text" id="nv-example" placeholder="ex.: 0002012658...">
-          </div>
-        </div>
-        <div class="btn-row">
-          <button type="button" class="btn" id="btn-add-var">Salvar variável</button>
-          <span class="copy-feedback" id="add-var-feedback">Salvo</span>
-        </div>
-        <p class="type-info" style="margin-top:0.75rem">Fica salva neste navegador. Para aparecer para todos, ela precisa entrar no código do site.</p>
-      </details>
-
       <div class="filter-bar">
         <div class="filter-top">
           <input type="search" id="search-var" class="search-input" placeholder="Buscar por variável, ERP ou descrição (ex: PIX, vencimento, #cliente_nome#, {codigopix}, [[valor]])...">
@@ -686,60 +666,10 @@
     const tbody = document.getElementById("vars-tbody");
     const searchInput = document.getElementById("search-var");
     const countInfo = document.getElementById("count-info");
-    const erpTabs = document.getElementById("erp-tabs");
+    const erpTabBtns = document.querySelectorAll("#erp-tabs .tab-btn");
     const catTabBtns = document.querySelectorAll("#cat-tabs .tab-btn");
     let currentErp = "all";
     let currentCategory = "all";
-
-    // Variáveis cadastradas à mão ficam no navegador (localStorage)
-    const VARS_KEY = "chatmix-variaveis";
-    const builtinVars = variablesData.slice();
-    const catLabels = { financeiro: "Financeiro", cliente: "Cliente", contrato: "Contrato / Rede" };
-    const knownErps = {};
-    builtinVars.forEach(v => { knownErps[v.erpLabel.toLowerCase()] = v.erp; });
-
-    function esc(t) {
-      return String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    }
-
-    function loadCustomVars() {
-      try { return JSON.parse(localStorage.getItem(VARS_KEY)) || []; } catch { return []; }
-    }
-
-    function erpKeyFor(label) {
-      return knownErps[label.toLowerCase()] || "x:" + label.toLowerCase();
-    }
-
-    function rebuildVariables() {
-      const custom = loadCustomVars().map((v, i) => ({
-        ...v, erp: erpKeyFor(v.erpLabel), catLabel: catLabels[v.cat], customIndex: i
-      }));
-      variablesData.length = 0;
-      variablesData.push(...builtinVars, ...custom);
-
-      // Abas e sugestões para sistemas novos
-      erpTabs.querySelectorAll(".tab-btn[data-custom]").forEach(b => b.remove());
-      const seen = new Set();
-      custom.forEach(v => {
-        if (!v.erp.startsWith("x:") || seen.has(v.erp)) return;
-        seen.add(v.erp);
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "tab-btn" + (currentErp === v.erp ? " active" : "");
-        b.dataset.erp = v.erp;
-        b.dataset.custom = "1";
-        b.textContent = v.erpLabel;
-        erpTabs.appendChild(b);
-      });
-      if (currentErp.startsWith("x:") && !seen.has(currentErp)) {
-        currentErp = "all";
-        erpTabs.querySelector('[data-erp="all"]').classList.add("active");
-      }
-      const names = new Set([...builtinVars.map(v => v.erpLabel), ...custom.map(v => v.erpLabel)]);
-      try { Object.keys(JSON.parse(localStorage.getItem("chatmix-sistemas")) || {}).forEach(n => names.add(n)); } catch {}
-      document.getElementById("erp-list").innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join("");
-      renderTable();
-    }
 
     function renderTable() {
       const query = searchInput.value.trim().toLowerCase();
@@ -766,12 +696,12 @@
       filtered.forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><span class="var-code">${esc(item.code)}</span></td>
-          <td><span class="erp-badge ${item.erp.startsWith("x:") ? "erp-custom" : "erp-" + item.erp}">${esc(item.erpLabel)}</span></td>
-          <td>${esc(item.desc)}</td>
-          <td><span class="cat-tag">${esc(item.catLabel)}</span></td>
-          <td style="color: var(--muted); font-family: monospace; font-size: 0.82rem;">${esc(item.example)}</td>
-          <td><button type="button" class="btn-copy-sm" data-copy="${esc(item.code)}">Copiar</button>${item.customIndex === undefined ? "" : ` <button type="button" class="btn-copy-sm btn-del-var" data-del="${item.customIndex}">Excluir</button>`}</td>
+          <td><span class="var-code">${item.code}</span></td>
+          <td><span class="erp-badge erp-${item.erp}">${item.erpLabel}</span></td>
+          <td>${item.desc}</td>
+          <td><span class="cat-tag">${item.catLabel}</span></td>
+          <td style="color: var(--muted); font-family: monospace; font-size: 0.82rem;">${item.example}</td>
+          <td><button type="button" class="btn-copy-sm" data-copy="${item.code}">Copiar</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -797,13 +727,6 @@
     }
 
     tbody.addEventListener("click", e => {
-      const del = e.target.closest(".btn-del-var");
-      if (del) {
-        const list = loadCustomVars();
-        list.splice(Number(del.dataset.del), 1);
-        try { localStorage.setItem(VARS_KEY, JSON.stringify(list)); } catch {}
-        return rebuildVariables();
-      }
       const btn = e.target.closest(".btn-copy-sm");
       if (!btn) return;
       const text = btn.getAttribute("data-copy");
@@ -821,27 +744,13 @@
 
     searchInput.addEventListener("input", renderTable);
 
-    erpTabs.addEventListener("click", e => {
-      const btn = e.target.closest(".tab-btn");
-      if (!btn) return;
-      erpTabs.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentErp = btn.dataset.erp;
-      renderTable();
-    });
-
-    document.getElementById("btn-add-var").addEventListener("click", () => {
-      const fb = document.getElementById("add-var-feedback");
-      const get = id => document.getElementById(id).value.trim();
-      const item = { erpLabel: get("nv-erp"), code: get("nv-code"), desc: get("nv-desc"), cat: get("nv-cat"), example: get("nv-example") };
-      const show = t => { fb.textContent = t; fb.classList.add("show"); setTimeout(() => fb.classList.remove("show"), 2000); };
-      if (!item.erpLabel || !item.code) return show("Preencha sistema e variável");
-      const list = loadCustomVars();
-      list.push(item);
-      try { localStorage.setItem(VARS_KEY, JSON.stringify(list)); } catch { return show("Não foi possível salvar neste navegador"); }
-      ["nv-code", "nv-desc", "nv-example"].forEach(id => { document.getElementById(id).value = ""; });
-      rebuildVariables();
-      show("Salvo");
+    erpTabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        erpTabBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentErp = btn.getAttribute("data-erp");
+        renderTable();
+      });
     });
 
     catTabBtns.forEach(btn => {
@@ -1004,8 +913,10 @@
       setTimeout(() => copyFeedback.classList.remove("show"), 2000);
     });
 
-    rebuildVariables();
+    renderTable();
     renderCustomOptions();
+    const initialErp = new URLSearchParams(window.location.search).get("erp");
+    if (initialErp && erpPresets[initialErp]) erpPresetSelect.value = initialErp;
     applyErpPreset(erpPresetSelect.value);
   </script>
 </body>
